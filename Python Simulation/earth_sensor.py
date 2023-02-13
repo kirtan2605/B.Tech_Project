@@ -16,8 +16,12 @@ def earth_sensor(true_value):
     # modeling sensor noise as white noise with StdDev = RMS = 0.03 deg
     # ...DOUBT....
 
-    stat_noise_RMS_deg = 0.03
-    order_of_accuracy_deg = 0.02
+    stat_noise_RMS_deg = 0.012
+
+
+    quantization_deg = 0.02
+    # not quantisation... order of accuracy will automatically be there
+    # find least count of the sensor -- quantization
 
 
     # check this snippet
@@ -31,15 +35,16 @@ def earth_sensor(true_value):
 
     true_value_magnitude_deg = np.rad2deg(true_value_magnitude)
 
-    multiple_number = np.floor(true_value_magnitude_deg/order_of_accuracy_deg)
-    remainder = true_value_magnitude_deg % order_of_accuracy_deg
-    if remainder >= 0.5*order_of_accuracy_deg:
+    multiple_number = np.floor(true_value_magnitude_deg/quantization_deg)
+    remainder = true_value_magnitude_deg % quantization_deg
+    if remainder >= 0.5*quantization_deg:
         multiple_number = multiple_number + 1
     else:
         pass
 
-    measured_value_deg = true_value_sign * multiple_number * order_of_accuracy_deg
+    measured_value_deg = true_value_sign * multiple_number * quantization_deg
 
     measured_value = np.deg2rad(measured_value_deg) + sensor_noise(stat_noise_RMS_deg)
+
 
     return measured_value
