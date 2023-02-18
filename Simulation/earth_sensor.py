@@ -10,21 +10,8 @@ def earth_sensor(true_value):
 
     """
 
-    # ....Sidi 8.3.2
-    # modeling the earth sensor with order of accuracy : 0.02 deg = 0.000349 rad
-    # this accuracy is accompanied by statistical noise : 0.03 deg RMS
-    # modeling sensor noise as white noise with StdDev = RMS = 0.03 deg
-    # ...DOUBT....
-
     stat_noise_RMS_deg = 0.012
-
-
     quantization_deg = 0.02
-    # not quantisation... order of accuracy will automatically be there
-    # find least count of the sensor -- quantization
-
-
-    # check this snippet
 
     if true_value < 0:
         true_value_sign = -1
@@ -43,8 +30,6 @@ def earth_sensor(true_value):
         pass
 
     measured_value_deg = true_value_sign * multiple_number * quantization_deg
-
     measured_value = np.deg2rad(measured_value_deg) + sensor_noise(stat_noise_RMS_deg)
-
 
     return measured_value

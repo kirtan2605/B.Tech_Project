@@ -48,32 +48,24 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     x_arr[:, 0] = initial_conditions
     roll_error_arr[0] = roll_desired - x_arr[0, 0]
 
-    # measurement is taken by the Earth Sensor every output_time seconds
-    # output_time must be greater than simulation Dt, hence let
-    # output_time = n * Dt        n > 1
-    # output_rate = 1/output_time
-    # output_step = n
-    # sample taken at every nth step of the simulation iteration
-    # we assume sampling always happens from the first step of iteration
+    # Earth Sensor Implementation
     output_time = 1  # time between each measurement of earth sensor
-    # output_rate = 1/output_time
     output_step = int(output_time / Dt)
 
     # controller rate is the rate at which the controller gives control commands
     # time_constant_of_control_system
     controller_time = 1
-    # controller_rate = 1/controller_time
     controller_step = int(controller_time / Dt)
 
     roll_deadband_deg = 0.04
     roll_deadband_rad = roll_deadband_deg * (pi / 180)
 
-    T_c = 20  # Torque Magnitude of Offset Thruster
+    T_c = 10e-3  # Torque Magnitude Multiplier
 
     # using a Butterworth Filter of order 1 to filter out the sensor noise
     filter_order = 1  # Order of the butterworth filter
     f_sample = 1 / Dt  # Sample frequency in Hz
-    f_cutoff_rps = 0.004 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
+    f_cutoff_rps = 0.006867 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
     b, a = butterworth_lpf(f_sample, f_cutoff_rps, filter_order)
 
     Tc_controller_output = 0
@@ -127,7 +119,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
 
     # plotting the result
     plt.plot(t_arr, np.rad2deg(x_arr[0, :]), linewidth=1, label='Roll Angle (degrees)')
-    plt.plot(t_arr, np.rad2deg(phi_measured_arr), linewidth=0.5, label='Measured Roll')
+    # plt.plot(t_arr, np.rad2deg(phi_measured_arr), linewidth=0.5, label='Measured Roll')
     plt.plot(t_arr, np.rad2deg(phi_measured_lpf_arr), linewidth=1, label='Measured Roll LPF')
     # plt.plot..... plot another data in same plot if needed
     plt.title('Roll Angle vs time', fontsize=12)

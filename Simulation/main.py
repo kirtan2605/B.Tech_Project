@@ -4,7 +4,7 @@ import math
 # initializing simulation runtime parameters
 start_time = 0              # simulation start time in sec
 end_time = 5000             # simulation end time in sec
-time_step = 0.5              # timestep Delta t
+time_step = 0.01              # timestep Delta t
 # time_step is the sampling time for our simulation
 runtime_parameters = [start_time, end_time, time_step]
 
@@ -12,7 +12,7 @@ runtime_parameters = [start_time, end_time, time_step]
 MOI_x = 1475.8425                   # moment of inertia about x-axis in kg.m^2
 MOI_y = 886.2425                    # moment of inertia about x-axis in kg.m^2
 MOI_z = 1532.96                     # moment of inertia about x-axis in kg.m^2
-wheel_momentum = 11                 # angular momentum of momentum wheel in N.m.sec
+wheel_momentum = 10                 # angular momentum of momentum wheel in N.m.sec
 orbit_rate = 2*math.pi/86400        # orbit rate in rad/sec
 
 nutation_frequency = wheel_momentum/((MOI_x*MOI_z)**0.5)
@@ -26,7 +26,7 @@ initial_yaw_rate = 0            # initial yaw rate in radians/sec
 initial_conditions = [initial_roll, initial_roll_rate, initial_yaw, initial_yaw_rate]
 
 # initializing System Control variables
-roll_desired = radians(2)       # desired roll angle in radians (5 deg = 0.0872665)
-offset_angle = 35.25            # offset angle of thruster in degree
+roll_desired = radians(0)       # desired roll angle in radians (5 deg = 0.0872665)
+offset_angle = 11.47            # offset angle of thruster in degree
 
 run_simulation(roll_desired, offset_angle, runtime_parameters, system_variables, initial_conditions)
