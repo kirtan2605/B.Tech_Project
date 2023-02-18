@@ -1,11 +1,10 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-# from random import seed
 from pandas import Series
 from pandas.plotting import autocorrelation_plot
 
-T_sam = 0.01
+T_sam = 0.1
 run_time = 100
 num_of_samples = int(run_time / T_sam) + 1
 sampling_freq = 1 / T_sam
@@ -24,11 +23,11 @@ plt.yticks(fontsize=12)
 plt.grid(True)
 plt.show()
 
-## Check with Autocorrelation Plots
+# check with Autocorrelation Plots
 autocorrelation_plot(White_Noise)
 plt.show()
 
-# Check with Power Spectral Density
+# check with Power Spectral Density
 plt.psd(White_Noise, Fs=sampling_freq)
-plt.xlim([0, 100])
+plt.xlim([0, 20])
 plt.show()
