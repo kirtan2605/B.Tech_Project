@@ -1,8 +1,7 @@
 from math import *
 
-
-def calculated_a(a_assumed):
-    ## spacecraft moments of inertia
+def system_variables():
+        ## spacecraft moments of inertia
     # calculating (INSAT-3DR : [2211, 2.4, 1.6, 1.5])
     mass = 2211             # mass in kg
     height = 2.4            # height in m
@@ -18,51 +17,63 @@ def calculated_a(a_assumed):
     # Iy = 680
     # Iz = 1000
 
-    print()
-    print("Ix : ", Ix, " kg-m^2")
-    print("Iy : ", Iy, " kg-m^2")
-    print("Iz : ", Iz, " kg-m^2")
-    print()
+    moments_of_inertia = (Ix, Iy, Iz)
 
-    wo = 2*pi/86400     # orbit frequency in rad/sec
-    ze = 0.9           # damping coefficient of closed loop poles
+    return moments_of_inertia
 
-    print("wo : ", wo)
 
-    Tdx_max = 3e-6           # maximum magnitude of disturbance torque
-    Tdz_max = 3e-6           # maximum magnitude of disturbance torque
+def calculate_parameters(a_assumed):
+
+    (Ix, Iy, Iz) = system_variables()
+
+    wo = 2*pi/86400         # orbit frequency in rad/sec
+    xi = 0.9                # damping coefficient of closed loop poles
+
+    Tdx_max = 3e-6          # maximum magnitude of disturbance torque
+    Tdz_max = 3e-6          # maximum magnitude of disturbance torque
     phi_ss = 0.045          # steady state error in roll in Deg
-    phi_ss = radians(phi_ss)
     psi_ss = 0.25           # steady state error in yaw in Deg
+
+    phi_ss = radians(phi_ss)
     psi_ss = radians(psi_ss)
 
 
-    # calculating h, kx without the approximation kx>>wo*h
-    kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
-    h = (Tdx_max/phi_ss - kx)/wo
+    # calculating h, kx without the approximation kx >> wo*h
+    Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
+    h = (Tdx_max/phi_ss - Kx)/wo
 
 
-    # calculating kxd,a_calculated, wn1, wn2 (THIS PART IS PERFECT)
-    A = sqrt(((wo * wo * h * h) + (wo * h * kx)) / (Ix * Iz))
-    B = 1 / (2 * Ix * ze)
-    C = (wo * h * (Ix + Iz) + Iz * kx + h * h) / (Ix * Iz)
+    # calculating kxd,a_calculated, wn1, wn2
+    A = sqrt(((wo * wo * h * h) + (wo * h * Kx)) / (Ix * Iz))
+    B = 1 / (2 * Ix * xi)
+    C = (wo * h * (Ix + Iz) + Iz * Kx + h * h) / (Ix * Iz)
 
-    Kxd = sqrt(((C + A * (2 - 4 * ze * ze)) * kx) / ((kx * B * B) - (2 * ze * A * B) + (h * wo) / (Ix * Iz)))
-    a_psi = (2 * ze * A * B * Kxd * Ix * Iz - wo * Kxd * h) / (h * kx)
+    Kxd = sqrt(((C + A * (2 - 4 * xi * xi)) * Kx) / ((Kx * B * B) - (2 * xi * A * B) + (h * wo) / (Ix * Iz)))
+    a_psi = (2 * xi * A * B * Kxd * Ix * Iz - wo * Kxd * h) / (h * Kx)
     Wn1 = ((Kxd * B) + sqrt(Kxd * Kxd * B * B - 4 * A)) / 2
     Wn2 = A / Wn1
 
-    print("h :", h)
-    print("Kx: " + str(kx))
-    print("Kxd: " + str(Kxd))
-    print("a_psi: " + str(a_psi))
-    print("Wn1: " + str(Wn1))
-    print("Wn2: " + str(Wn2))
-    print()
+    calculated_parameters = (wo, xi, h, Kx, Kxd, a_psi, Wn1, Wn2)
 
+    return calculated_parameters
 
+def display_parameters(parameters):
+    sys_var = system_variables()
+    print("\nSystem Parameters")
+    print("Ix :", sys_var[0])
+    print("Iy :", sys_var[1])
+    print("Iz :", sys_var[2] , "\n")
 
-    return a_psi
+    print("\nSimulation Parameters")
+    print("w0 :", parameters[0])
+    print("xi :", parameters[1])
+    print("h :", parameters[2])
+    print("Kx: ", parameters[3])
+    print("Kxd: ", parameters[4])
+    print("a_psi: ", parameters[5])
+    print("Wn1: ", parameters[6])
+    print("Wn2: ", parameters[7] , "\n")
+
 
 # the initial assumption of the value of a starts with 1
 # corrections are made in the value of a till a desired accuracy is achieved
@@ -77,8 +88,9 @@ alpha_guess = radians(alpha_guess_deg)
 a_guess = tan(alpha_guess)
 
 
-a_return = calculated_a(a_guess)
-alpha_calculated = atan(a_return)
+simulation_parameters = calculate_parameters(a_guess)
+a_calculated = simulation_parameters[3]
+alpha_calculated = atan(a_calculated)
 
 alpha_error = abs(alpha_calculated - alpha_guess)
 
@@ -88,13 +100,15 @@ while alpha_error > alpha_tolerance:
 
     a_guess = tan(alpha_guess)
 
-    a_return = calculated_a(a_guess)
-    alpha_calculated = atan(a_return)
+    simulation_parameters = calculate_parameters(a_guess)
+    a_calculated = simulation_parameters[3]
+    alpha_calculated = atan(a_calculated)
 
     alpha_error = abs(alpha_calculated - alpha_guess)
 
-print("a guess : ", a_guess)
-print("a returned : ", a_return)
+# print("a guess : ", a_guess)
+# print("a returned : ", a_calculated)
 
+display_parameters(simulation_parameters)
 
 
