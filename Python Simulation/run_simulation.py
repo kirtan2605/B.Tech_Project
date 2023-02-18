@@ -127,7 +127,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
 
     # plotting the result
     plt.plot(t_arr, np.rad2deg(x_arr[0, :]), linewidth=1, label='Roll Angle (degrees)')
-    # plt.plot(t_arr, np.rad2deg(phi_measured_arr), linewidth=0.5, label='Measured Roll')
+    plt.plot(t_arr, np.rad2deg(phi_measured_arr), linewidth=0.5, label='Measured Roll')
     plt.plot(t_arr, np.rad2deg(phi_measured_lpf_arr), linewidth=1, label='Measured Roll LPF')
     # plt.plot..... plot another data in same plot if needed
     plt.title('Roll Angle vs time', fontsize=12)

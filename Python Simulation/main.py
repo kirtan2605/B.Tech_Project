@@ -4,7 +4,7 @@ import math
 # initializing simulation runtime parameters
 start_time = 0              # simulation start time in sec
 end_time = 5000             # simulation end time in sec
-time_step = 0.01              # timestep Delta t
+time_step = 0.5              # timestep Delta t
 # time_step is the sampling time for our simulation
 runtime_parameters = [start_time, end_time, time_step]
 
