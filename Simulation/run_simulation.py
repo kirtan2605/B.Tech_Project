@@ -18,7 +18,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     c = (omega0 ** 2) * (Iy - Ix)
 
     # x_dot = A.x + B.Md + B.Mc
-    B = [[0, 0], [1 / Ix, 0], [0, 0], [0, 1 / Iz]]
+    B = [[0, 0], [1/Ix, 0], [0, 0], [0, 1/Iz]]
     A1 = (-1 * (a + omega0 * h)) / Ix
     A2 = (-(b + h)) / Ix
     A3 = (b + h) / Iz
