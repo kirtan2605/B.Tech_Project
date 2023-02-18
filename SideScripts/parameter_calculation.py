@@ -1,8 +1,8 @@
 from math import *
 
 def system_variables():
-        ## spacecraft moments of inertia
-    # calculating (INSAT-3DR : [2211, 2.4, 1.6, 1.5])
+    # calculating spacecraft moments of inertia
+    # (INSAT-3DR : [2211, 2.4, 1.6, 1.5])
     mass = 2211             # mass in kg
     height = 2.4            # height in m
     width = 1.6             # width in m
@@ -12,7 +12,7 @@ def system_variables():
     Ix = mass*(height**2 + depth**2)/12
     Iy = mass*(width**2 + depth**2)/12
 
-    ## or define the moments of inertia
+    ## defining the moments of inertia
     # Ix = 800
     # Iy = 680
     # Iz = 1000
@@ -20,7 +20,6 @@ def system_variables():
     moments_of_inertia = (Ix, Iy, Iz)
 
     return moments_of_inertia
-
 
 def calculate_parameters(a_assumed):
 
@@ -74,19 +73,13 @@ def display_parameters(parameters):
     print("Wn1: ", parameters[6])
     print("Wn2: ", parameters[7] , "\n")
 
-
-# the initial assumption of the value of a starts with 1
-# corrections are made in the value of a till a desired accuracy is achieved
-
-
 # set error tolerence in alpha
-alpha_tolerance_deg = 0.0005          # tolerance in alpha in Deg
-alpha_tolerance = alpha_tolerance_deg*pi/180
+alpha_tolerance_deg = 0.0005            # tolerance in alpha in Deg
+alpha_tolerance = radians(alpha_tolerance_deg)
 
 alpha_guess_deg = 5
 alpha_guess = radians(alpha_guess_deg)
 a_guess = tan(alpha_guess)
-
 
 simulation_parameters = calculate_parameters(a_guess)
 a_calculated = simulation_parameters[3]
@@ -96,8 +89,7 @@ alpha_error = abs(alpha_calculated - alpha_guess)
 
 while alpha_error > alpha_tolerance:
 
-    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/10
-
+    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/2
     a_guess = tan(alpha_guess)
 
     simulation_parameters = calculate_parameters(a_guess)
@@ -106,9 +98,4 @@ while alpha_error > alpha_tolerance:
 
     alpha_error = abs(alpha_calculated - alpha_guess)
 
-# print("a guess : ", a_guess)
-# print("a returned : ", a_calculated)
-
 display_parameters(simulation_parameters)
-
-
