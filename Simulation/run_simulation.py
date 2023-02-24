@@ -7,11 +7,28 @@ from earth_sensor import *
 
 from butterworth_lpf import *
 from low_pass_filter import *
+from schmitt_trigger import *
+
+def plot_yaw_vs_roll(x_arr):
+    # plotting the result
+    plt.plot(np.rad2deg(x_arr[2, :]), np.rad2deg(x_arr[0, :]),linewidth=1)
+    # plt.plot..... plot another data in same plot if needed
+    plt.title('Roll Angle vs Yaw Angle', fontsize=12)
+    plt.ylabel('Roll Angle (degrees)', fontsize=12)
+    plt.xlabel('Yaw Angle (degrees)', fontsize=12)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.grid(True)
+    # plt.axis
+    # plt.legend()
+    plt.show()
 
 
-def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, initial_conditions):
+
+def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, sampling_parameters, initial_conditions):
     t_start, t_end, Dt = runtime_parameters
     Ix, Iy, Iz, omega0, OmegaN, h = system_variables
+    output_time, controller_time = sampling_parameters
 
     a = 4 * (omega0 ** 2) * (Iy - Iz)
     b = -1 * omega0 * (Ix - Iy + Iz)
@@ -48,24 +65,19 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     x_arr[:, 0] = initial_conditions
     roll_error_arr[0] = roll_desired - x_arr[0, 0]
 
-    # Earth Sensor Implementation
-    output_time = 1  # time between each measurement of earth sensor
+    # Earth Sensor and Controller Delay Implementation
     output_step = int(output_time / Dt)
-
-    # controller rate is the rate at which the controller gives control commands
-    # time_constant_of_control_system
-    controller_time = 1
-    controller_step = int(controller_time / Dt)
+    controller_step = int(controller_time / Dt)     # verify implementation
 
     roll_deadband_deg = 0.04
     roll_deadband_rad = roll_deadband_deg * (pi / 180)
 
-    T_c = 10e-3  # Torque Magnitude Multiplier
+    T_c = 5  # Torque Magnitude Multiplier
 
     # using a Butterworth Filter of order 1 to filter out the sensor noise
     filter_order = 1  # Order of the butterworth filter
     f_sample = 1 / Dt  # Sample frequency in Hz
-    f_cutoff_rps = 0.006867 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
+    f_cutoff_rps = 0.009940629716854839 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
     b, a = butterworth_lpf(f_sample, f_cutoff_rps, filter_order)
 
     Tc_controller_output = 0
@@ -103,15 +115,15 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         x_arr[0, i + 1] = transform_to_minus_pi_to_pi(x_arr[0, i + 1])
         x_arr[2, i + 1] = transform_to_minus_pi_to_pi(x_arr[2, i + 1])
 
-        if i % controller_step == 0:
-            if i < 2:
-                Tc_controller_output = PD_Control(roll_error_measured_arr[0:i], Tc_controller_output, Dt)
-            else:
-                Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, Dt)
-
-            control_torque_arr[i + 1] = T_c * Tc_controller_output
+        if i < 2:
+            Tc_controller_output = PD_Control(roll_error_measured_arr[0:i], Tc_controller_output, Dt)
         else:
-            control_torque_arr[i + 1] = control_torque_arr[i]
+            Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, Dt)
+        #print(Tc_controller_output)
+        control_torque_arr[i + 1] =  dual_schmitt_trigger(Tc_controller_output, control_torque_arr[i])
+
+        # setting prev value for next iteration as current value
+        Tc_controller_output_prev = Tc_controller_output
 
         # effects of actuation set-up i.e. offset nature of thrusters
         offset_actuation = [cos(radians(alpha_d)), -1 * sin(radians(alpha_d))]
@@ -146,19 +158,6 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     plt.show()
 
     # plotting the result
-    plt.plot(np.rad2deg(x_arr[0, :]), np.rad2deg(x_arr[2, :]), linewidth=1)
-    # plt.plot..... plot another data in same plot if needed
-    plt.title('Yaw Angle vs Roll Angle', fontsize=12)
-    plt.xlabel('Roll Angle (degrees)', fontsize=12)
-    plt.ylabel('Yaw Angle (degrees)', fontsize=12)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.grid(True)
-    # plt.axis
-    # plt.legend()
-    plt.show()
-
-    # plotting the result
     plt.plot(t_arr, control_torque_arr[:], linewidth=1, label='Control Torque')
     # plt.plot..... plot another data in same plot if needed
     plt.title('Control Torque vs time', fontsize=12)
@@ -170,3 +169,5 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     # plt.axis
     # plt.legend()
     plt.show()
+
+    plot_yaw_vs_roll(x_arr)

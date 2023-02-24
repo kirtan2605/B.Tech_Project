@@ -26,7 +26,7 @@ def calculate_parameters(a_assumed):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    xi = 0.3                # damping coefficient of closed loop poles
+    xi = 0.7              # damping coefficient of closed loop poles
 
     Tdx_max = 3e-6          # maximum magnitude of disturbance torque
     Tdz_max = 3e-6          # maximum magnitude of disturbance torque

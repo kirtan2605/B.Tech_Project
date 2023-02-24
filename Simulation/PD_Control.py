@@ -7,8 +7,8 @@ def PD_Control(ip, op_prev, Dt):
         ip = np.pad(ip, (2-len(ip), 0), 'constant', constant_values=(0, 0))
 
     # PD Control parameters
-    kp = 0.003134
-    kd = 6.221771
+    kp = 0.0031339430008059154
+    kd = 20.762778707475093
 
     a = ((kd*2/Dt) + kp)
     b = (kp - (kd*2/Dt))
