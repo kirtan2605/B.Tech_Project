@@ -1,24 +1,23 @@
 
 def dual_schmitt_trigger(ip, op_prev):
 
-    # Dual Schmitt Trigger Parameters
-    OHP = 0.01
-    OHM = -0.01
+    # Dual Schmitt Trigger Parameters calculation!!
+    
+    Um = 5
     OFF = 0
 
-    ILM = -0.001
-    IHM = -0.03
-    ILP = 0.001
-    IHP = 0.03
+    h = 0.3
+    U_on = 0.45
+    U_off = (U_on - h)
 
     # returning pwpf_output
-    if (ip < IHM ):
-        pwpfm_op = OHM
-    if (ip > IHP ):
-        pwpfm_op = OHP
-    if (ip > ILM and ip < ILP):
+    if (ip < -U_on ):
+        pwpfm_op = -Um
+    if (ip > U_on ):
+        pwpfm_op = Um
+    if (ip > -U_off and ip < U_off):
         pwpfm_op = OFF
-    if (ip < ILM and ip > IHM) or (ip > ILP and ip < IHP) :
+    if (ip < -U_off and ip > -U_on) or (ip > U_off and ip < U_on) :
         pwpfm_op = op_prev
 
     return pwpfm_op

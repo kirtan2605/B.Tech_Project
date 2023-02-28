@@ -3,7 +3,7 @@ import math
 
 # initializing simulation runtime parameters
 start_time = 0              # simulation start time in sec
-end_time = 10000             # simulation end time in sec
+end_time = 10000            # simulation end time in sec
 time_step = 0.1             # timestep Delta t
 # time_step is the sampling time for our simulation
 runtime_parameters = [start_time, end_time, time_step]
@@ -12,6 +12,7 @@ runtime_parameters = [start_time, end_time, time_step]
 MOI_x = 1475.8425                   # moment of inertia about x-axis in kg.m^2
 MOI_y = 886.2425                    # moment of inertia about x-axis in kg.m^2
 MOI_z = 1532.96                     # moment of inertia about x-axis in kg.m^2
+
 wheel_momentum = 10                 # angular momentum of momentum wheel in N.m.sec
 orbit_rate = 2*math.pi/86400        # orbit rate in rad/sec
 

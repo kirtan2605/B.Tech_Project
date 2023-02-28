@@ -8,6 +8,7 @@ from earth_sensor import *
 from butterworth_lpf import *
 from low_pass_filter import *
 from schmitt_trigger import *
+from pwpfm import *
 
 def plot_yaw_vs_roll(x_arr):
     # plotting the result
@@ -60,6 +61,9 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     phi_measured_arr = np.zeros(n_steps + 1)
     phi_measured_lpf_arr = np.zeros(n_steps + 1)
     roll_error_measured_arr = np.zeros(n_steps + 1)
+    
+    pwpfm_error_arr = np.zeros(n_steps + 1)
+    pwpfm_error_lpf_arr = np.zeros(n_steps + 1)
 
     # adding initial conditions
     x_arr[:, 0] = initial_conditions
@@ -119,11 +123,12 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
             Tc_controller_output = PD_Control(roll_error_measured_arr[0:i], Tc_controller_output, Dt)
         else:
             Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, Dt)
-        #print(Tc_controller_output)
-        control_torque_arr[i + 1] =  dual_schmitt_trigger(Tc_controller_output, control_torque_arr[i])
+        
+        # control_torque_arr[i + 1] =  dual_schmitt_trigger(T_c*Tc_controller_output, control_torque_arr[i])
 
-        # setting prev value for next iteration as current value
-        Tc_controller_output_prev = Tc_controller_output
+        control_torque_arr[i+1] = T_c*Tc_controller_output
+
+        control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], Dt)
 
         # effects of actuation set-up i.e. offset nature of thrusters
         offset_actuation = [cos(radians(alpha_d)), -1 * sin(radians(alpha_d))]
@@ -170,4 +175,4 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     # plt.legend()
     plt.show()
 
-    plot_yaw_vs_roll(x_arr)
+    # plot_yaw_vs_roll(x_arr)
