@@ -44,8 +44,6 @@ def pwpfm(ip, error_prev, error_lpf_prev,  op_prev, Dt):
 
     pwpfm_value = dual_schmitt_trigger(error_lpf, op_prev)
 
-    #pwm_value = 0
-
     return_list = [pwpfm_value, error, error_lpf]
     return return_list
 

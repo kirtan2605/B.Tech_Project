@@ -35,7 +35,16 @@ for i in range(1,len(trigger_check_array)) :
     output.append(dual_schmitt_trigger(trigger_check_array[i],output[-1]))
 
 
+ILM = -1.5
+IHM = -2.2
+ILP = 1.5
+IHP = 2.2
+
 # plotting the result
+plt.axhline(y = ILM, color = 'r')
+plt.axhline(y = IHM, color = 'g')
+plt.axhline(y = ILP, color = 'r')
+plt.axhline(y = IHP, color = 'g')
 plt.plot(output, linewidth=1, label='Output')
 plt.plot(trigger_check_array, linewidth=1, label='Input')
 plt.title('Schmitt Trigger Output Check', fontsize=12)

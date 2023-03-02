@@ -6,8 +6,8 @@ def dual_schmitt_trigger(ip, op_prev):
     Um = 5
     OFF = 0
 
-    h = 0.3
-    U_on = 0.45
+    h = 0.9
+    U_on = 1
     U_off = (U_on - h)
 
     # returning pwpf_output
