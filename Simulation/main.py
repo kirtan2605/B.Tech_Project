@@ -3,7 +3,7 @@ import math
 
 # initializing simulation runtime parameters
 start_time = 0              # simulation start time in sec
-end_time = 1000            # simulation end time in sec
+end_time = 50000            # simulation end time in sec
 time_step = 1             # timestep Delta t
 # time_step is the sampling time for our simulation
 runtime_parameters = [start_time, end_time, time_step]
@@ -28,7 +28,7 @@ initial_conditions = [initial_roll, initial_roll_rate, initial_yaw, initial_yaw_
 
 # initializing System Control variables
 roll_desired = radians(0)       # desired roll angle in radians (5 deg = 0.0872665)
-offset_angle = 34.100589826467846            # offset angle of thruster in degree
+offset_angle = 1.5            # offset angle of thruster in degree
 
 # time between each measurement of earth sensor
 output_time = 1

@@ -123,12 +123,12 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
             Tc_controller_output = PD_Control(roll_error_measured_arr[0:i], Tc_controller_output, Dt)
         else:
             Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, Dt)
-        
-        # control_torque_arr[i + 1] =  dual_schmitt_trigger(T_c*Tc_controller_output, control_torque_arr[i])
+
+        # control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], Dt)
 
         control_torque_arr[i+1] = T_c*Tc_controller_output
 
-        control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], Dt)
+        #control_torque_arr[i + 1] =  dual_schmitt_trigger(T_c*Tc_controller_output, control_torque_arr[i])
 
         # effects of actuation set-up i.e. offset nature of thrusters
         offset_actuation = [cos(radians(alpha_d)), -1 * sin(radians(alpha_d))]

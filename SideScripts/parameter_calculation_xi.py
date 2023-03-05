@@ -26,21 +26,21 @@ def calculate_parameters(a_assumed):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
+    wo = 7.236e-05
     xi = 0.7                # damping coefficient of closed loop poles
 
-    Tdx_max = 3e-6          # maximum magnitude of disturbance torque
-    Tdz_max = 3e-6          # maximum magnitude of disturbance torque
-    phi_ss = 0.045          # steady state error in roll in Deg
-    psi_ss = 0.25           # steady state error in yaw in Deg
+    Tdx_max = 5e-6          # maximum magnitude of disturbance torque
+    Tdz_max = 5e-6          # maximum magnitude of disturbance torque
+    phi_ss = 0.05          # steady state error in roll in Deg
+    psi_ss = 0.4           # steady state error in yaw in Deg
 
     phi_ss = radians(phi_ss)
     psi_ss = radians(psi_ss)
 
 
-    # calculating h, kx without the approximation kx >> wo*h
+    # calculating h, kx without the approximation kx >> wo*h !!
     Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
     h = (Tdx_max/phi_ss - Kx)/wo
-
 
     # calculating kxd,a_calculated, wn1, wn2
     A = sqrt(((wo * wo * h * h) + (wo * h * Kx)) / (Ix * Iz))

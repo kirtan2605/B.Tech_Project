@@ -3,11 +3,11 @@ def dual_schmitt_trigger(ip, op_prev):
 
     # Dual Schmitt Trigger Parameters calculation!!
     
-    Um = 5
+    Um = 0.05
     OFF = 0
 
-    h = 0.9
-    U_on = 1
+    h = 0.03
+    U_on = 0.045
     U_off = (U_on - h)
 
     # returning pwpf_output

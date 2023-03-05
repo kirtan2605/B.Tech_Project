@@ -3,11 +3,11 @@ from schmitt_trigger import *
 def pwpfm(ip, error_prev, error_lpf_prev,  op_prev, Dt):
 
     # pwpfm gain parameter
-    k_pm = 20
+    k_pm = 1
 
     # lpf parameters
-    km = 1
-    tm = 0.1
+    km = 4.3
+    tm = 0.35
     
     ip = k_pm*ip
 
