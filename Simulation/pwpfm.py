@@ -1,19 +1,19 @@
 from schmitt_trigger import *
 
-def pwpfm(ip, error_prev, error_lpf_prev,  op_prev, Dt):
+def pwpfm(ip, error_prev, error_lpf_prev,  op_prev, T_sam):
 
     # pwpfm gain parameter
-    k_pm = 1
+    k_pm = 10
 
     # lpf parameters
     km = 4.3
-    tm = 0.35
+    tm = 0.5
     
     ip = k_pm*ip
 
     error = ip - op_prev
 
-    T = (2*tm)/Dt
+    T = (2*tm)/T_sam
     error_lpf = (km*(error + error_prev) + T*error_lpf_prev)/(T+1)
 
     pwpfm_value = dual_schmitt_trigger(error_lpf, op_prev)

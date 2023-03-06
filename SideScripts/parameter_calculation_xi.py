@@ -13,9 +13,9 @@ def system_variables():
     Iy = mass*(width**2 + depth**2)/12
 
     ## defining the moments of inertia
-    # Ix = 800
+    Ix = 800
     # Iy = 680
-    # Iz = 1000
+    Iz = 1000
 
     moments_of_inertia = (Ix, Iy, Iz)
 
@@ -27,7 +27,7 @@ def calculate_parameters(a_assumed):
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
     wo = 7.236e-05
-    xi = 0.7                # damping coefficient of closed loop poles
+    xi = 0.045                # damping coefficient of closed loop poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
     Tdz_max = 5e-6          # maximum magnitude of disturbance torque
@@ -39,8 +39,11 @@ def calculate_parameters(a_assumed):
 
 
     # calculating h, kx without the approximation kx >> wo*h !!
-    Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
-    h = (Tdx_max/phi_ss - Kx)/wo
+    #Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
+    #h = (Tdx_max/phi_ss - Kx)/wo
+
+    h = (Tdz_max + a_assumed*Tdx_max)/wo*psi_ss
+    Kx = Tdx_max/phi_ss - wo*h
 
     # calculating kxd,a_calculated, wn1, wn2
     A = sqrt(((wo * wo * h * h) + (wo * h * Kx)) / (Ix * Iz))
@@ -75,7 +78,7 @@ def display_parameters(parameters):
     print("Wn2: ", parameters[7] , "\n")
 
 # set error tolerence in alpha
-alpha_tolerance_deg = 0.001            # tolerance in alpha in Deg
+alpha_tolerance_deg = 0.01            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
 alpha_guess_deg = 5
@@ -83,7 +86,7 @@ alpha_guess = radians(alpha_guess_deg)
 a_guess = tan(alpha_guess)
 
 simulation_parameters = calculate_parameters(a_guess)
-a_calculated = simulation_parameters[3]
+a_calculated = simulation_parameters[5]
 alpha_calculated = atan(a_calculated)
 
 alpha_error = abs(alpha_calculated - alpha_guess)
@@ -94,7 +97,7 @@ while alpha_error > alpha_tolerance:
     a_guess = tan(alpha_guess)
 
     simulation_parameters = calculate_parameters(a_guess)
-    a_calculated = simulation_parameters[3]
+    a_calculated = simulation_parameters[5]
     alpha_calculated = atan(a_calculated)
 
     alpha_error = abs(alpha_calculated - alpha_guess)

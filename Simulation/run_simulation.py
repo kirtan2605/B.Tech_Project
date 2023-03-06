@@ -29,7 +29,8 @@ def plot_yaw_vs_roll(x_arr):
 def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, sampling_parameters, initial_conditions):
     t_start, t_end, Dt = runtime_parameters
     Ix, Iy, Iz, omega0, OmegaN, h = system_variables
-    output_time, controller_time = sampling_parameters
+    output_time, one = sampling_parameters
+    T_sam = output_time
 
     a = 4 * (omega0 ** 2) * (Iy - Iz)
     b = -1 * omega0 * (Ix - Iy + Iz)
@@ -57,6 +58,8 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     # The Earth Sensor measures the pitch and roll angles only
     # the roll rate is  calculated from consecutive roll measurements
     control_torque_arr = np.zeros(n_steps + 1)
+    positive_control_torque_arr = np.zeros(n_steps + 1)
+    negative_control_torque_arr = np.zeros(n_steps + 1)
     roll_error_arr = np.zeros(n_steps + 1)
     phi_measured_arr = np.zeros(n_steps + 1)
     phi_measured_lpf_arr = np.zeros(n_steps + 1)
@@ -71,20 +74,39 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
 
     # Earth Sensor and Controller Delay Implementation
     output_step = int(output_time / Dt)
-    controller_step = int(controller_time / Dt)     # verify implementation
 
-    roll_deadband_deg = 0.04
-    roll_deadband_rad = roll_deadband_deg * (pi / 180)
 
-    T_c = 5  # Torque Magnitude Multiplier
+    T_c = 1  # Torque Magnitude Multiplier
+
+    Wn_nut = 0.006688126294945937           # nutation frequency in rad/sec
+    f_nut = Wn_nut/(2*pi)
+    t_nut = 1/f_nut
+    inhibition_time = t_nut/2
+    inhibition_step = int(round(inhibition_time / Dt))
+    print("inhibition steps : ", inhibition_step)
+    print("inhibition time : ", inhibition_time)
 
     # using a Butterworth Filter of order 1 to filter out the sensor noise
     filter_order = 1  # Order of the butterworth filter
-    f_sample = 1 / Dt  # Sample frequency in Hz
-    f_cutoff_rps = 0.009940629716854839 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
+    f_sample = 1 / T_sam  # Sample frequency in Hz
+    f_cutoff_rps = Wn_nut * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
     b, a = butterworth_lpf(f_sample, f_cutoff_rps, filter_order)
 
     Tc_controller_output = 0
+
+    #positive_thruster_on_counter = 0
+    #positive_thruster_off_counter = 0
+
+    thruster_on_counter = 0
+    thruster_off_counter = 0
+
+    #negative_thruster_on_counter = 0
+    #negative_thruster_off_counter = 0
+
+    #positive_inhibition = False
+    #negative_inhibition = False
+
+    inhibition = False
 
     for i in range(0, n_steps):
 
@@ -124,15 +146,100 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         else:
             Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, Dt)
 
-        # control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], Dt)
+        control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], T_sam)
 
-        control_torque_arr[i+1] = T_c*Tc_controller_output
+        # removing sudden sign change of control torque
+        if (np.sign(control_torque_arr[i+1])*np.sign(control_torque_arr[i]) < 0) :
+            control_torque_arr[i+1] = 0
 
-        #control_torque_arr[i + 1] =  dual_schmitt_trigger(T_c*Tc_controller_output, control_torque_arr[i])
+
+        # nutation attenuation by seperating pules with half the nutation period.
+        if not inhibition :
+            if (control_torque_arr[i+1] != 0 and control_torque_arr[i] == 0) :
+                thruster_on_step = i+1
+                thruster_on_counter = thruster_on_counter + 1
+                print("thruster on")
+            if (control_torque_arr[i+1] == 0 and control_torque_arr[i] != 0) :
+                thruster_off_step = i+1
+                thruster_off_counter = thruster_off_counter + 1
+                print("thruster off")
+
+        if thruster_off_counter%2 != 0 :
+            if i+1 < thruster_on_step + inhibition_step :
+                inhibition = True
+                control_torque_arr[i+1] = 0
+            if i+1 == thruster_on_step + inhibition_step :
+                print("inhibition ends")
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+                thruster_on_counter = thruster_on_counter + 1
+            if i+1 > thruster_on_step + inhibition_step and i+1 < thruster_off_step + inhibition_step :
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+            if i+1 == thruster_off_step + inhibition_step :
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+                thruster_off_counter = thruster_off_counter + 1
+                inhibition = False
+
+
+
+
+        '''
+
+        # nutation attenuation by seperating pules with half the nutation period.
+        if not positive_inhibition :
+            if (control_torque_arr[i+1] > 0 and control_torque_arr[i] <= 0) :
+                positive_thruster_on_step = i+1
+                positive_thruster_on_counter = positive_thruster_on_counter + 1
+                print("positive thruster on")
+            if (control_torque_arr[i+1] <= 0 and control_torque_arr[i] > 0) :
+                positive_thruster_off_step = i+1
+                positive_thruster_off_counter = positive_thruster_off_counter + 1
+                print("positive thruster off")
+
+        if positive_thruster_off_counter%2 != 0 :
+            if i+1 < positive_thruster_on_step + inhibition_step :
+                positive_inhibition = True
+                control_torque_arr[i+1] = 0
+            if i+1 == positive_thruster_on_step + inhibition_step :
+                print("positive inhibition ends")
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+                positive_thruster_on_counter = positive_thruster_on_counter + 1
+            if i+1 > positive_thruster_on_step + inhibition_step and i+1 < positive_thruster_off_step + inhibition_step :
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+            if i+1 == positive_thruster_off_step + inhibition_step :
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+                positive_thruster_off_counter = positive_thruster_off_counter + 1
+                positive_inhibition = False
+           
+        if not negative_inhibition :
+            if (control_torque_arr[i+1] > 0 and control_torque_arr[i] <= 0) :
+                negative_thruster_on_step = i+1
+                negative_thruster_on_counter = negative_thruster_on_counter + 1
+                print("negative thruster on")
+            if (control_torque_arr[i+1] <= 0 and control_torque_arr[i] > 0) :
+                negative_thruster_off_step = i+1
+                negative_thruster_off_counter = negative_thruster_off_counter + 1
+                print("negative thruster off")
+
+        if negative_thruster_off_counter%2 != 0 :
+            if i+1 < negative_thruster_on_step + inhibition_step :
+                negative_inhibition = True
+                control_torque_arr[i+1] = 0
+            if i+1 == negative_thruster_on_step + inhibition_step :
+                print("negative inhibition ends")
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+                negative_thruster_on_counter = negative_thruster_on_counter + 1
+            if i+1 > negative_thruster_on_step + inhibition_step and i+1 < negative_thruster_off_step + inhibition_step :
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+            if i+1 == negative_thruster_off_step + inhibition_step :
+                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
+                negative_thruster_off_counter = negative_thruster_off_counter + 1
+                negative_inhibition = False
+        '''
 
         # effects of actuation set-up i.e. offset nature of thrusters
         offset_actuation = [cos(radians(alpha_d)), -1 * sin(radians(alpha_d))]
         Mc_arr[:, i + 1] = np.multiply(offset_actuation, control_torque_arr[i + 1])
+
 
     # plotting the result
     plt.plot(t_arr, np.rad2deg(x_arr[0, :]), linewidth=1, label='Roll Angle (degrees)')
@@ -163,7 +270,8 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     plt.show()
 
     # plotting the result
-    plt.plot(t_arr, control_torque_arr[:], linewidth=1, label='Control Torque')
+    plt.plot(t_arr, control_torque_arr[:],linewidth=1, label='Control Torque')
+    #plt.plot(t_arr, control_torque_arr[:],marker = '.',linewidth=1, label='Control Torque')
     # plt.plot..... plot another data in same plot if needed
     plt.title('Control Torque vs time', fontsize=12)
     plt.xlabel('t (seconds)', fontsize=12)

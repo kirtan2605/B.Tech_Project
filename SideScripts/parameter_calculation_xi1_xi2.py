@@ -14,9 +14,9 @@ def system_variables():
     Iy = mass*(width**2 + depth**2)/12
 
     ## defining the moments of inertia
-    # Ix = 800
+    Ix = 800
     # Iy = 680
-    # Iz = 1000
+    Iz = 1000
 
     moments_of_inertia = (Ix, Iy, Iz)
 
@@ -47,8 +47,8 @@ def calculate_parameters(a):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    wo = 7.236e-5
-    xi1 = 0.3               # damping coefficient of closed loop nutation frequency poles
+    #wo = 7.236e-5
+    xi1 = 0.7               # damping coefficient of closed loop nutation frequency poles
     xi2 = 0.7               # damping coefficient of closed loop orbit rate poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
@@ -60,8 +60,14 @@ def calculate_parameters(a):
     psi_ss = radians(psi_ss)
 
     # calculating h, kx without the approximation kx >> wo*h
-    Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a*phi_ss)
-    h = (Tdx_max/phi_ss - Kx)/wo
+    #Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a*phi_ss)
+    #h = (Tdx_max/phi_ss - Kx)/wo
+
+    # calculating h, kx with approximation kx >> wo*h
+    h = (Tdz_max + a*Tdx_max)/wo*psi_ss
+    Kx = Tdx_max/phi_ss - wo*h
+
+
 
     print(h)
     print(Kx)
@@ -104,19 +110,19 @@ def calculate_parameters(a):
 alpha_tolerance_deg = 0.001            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
-alpha_guess_deg = 10
+alpha_guess_deg = 34
 alpha_guess = radians(alpha_guess_deg)
 a_guess = tan(alpha_guess)
 
 simulation_parameters = calculate_parameters(a_guess)
-a_calculated = simulation_parameters[3]
+a_calculated = simulation_parameters[6]
 alpha_calculated = atan(a_calculated)
 
 alpha_error = abs(alpha_calculated - alpha_guess)
 
 while alpha_error > alpha_tolerance:
 
-    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/10
+    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/5
     a_guess = tan(alpha_guess)
 
     simulation_parameters = calculate_parameters(a_guess)
