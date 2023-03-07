@@ -80,6 +80,7 @@ def display_parameters(parameters):
     print("Wn2: ", Wn2 , "\n")      
 
     # verify if the equations hold for epsilon e
+    e = 1
     
     RHS1 = (Iz*Kxd)
     RHS2 = (wo*h*(Ix+Iz) + Iz*Kx + h*h + a_psi*h*Kxd)
@@ -108,10 +109,22 @@ def display_parameters(parameters):
     print("RHS3 percentage : ", diff3RHSp, "% LHS3 percentage : ", diff3LHSp,"%")
     print("RHS4 percentage : ", diff4RHSp, "% LHS4 percentage : ", diff4LHSp,"%")
 
-    if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
-        print("All equations satisfied")
+    if diff1RHSp < e and diff1LHSp < e :
+        print("Equation 1 satisfied")
     else :
-        print("All equations are NOT satisfied")
+        print("Equation 1 NOTe satisfied")
+    if diff2RHSp < e and diff2LHSp < e :
+        print("Equation 2 satisfied")
+    else :
+        print("Equation 2 NOT satisfied")
+    if diff3RHSp < e and diff3LHSp < e :
+        print("Equation 3 satisfied")
+    else :
+        print("Equation 3 NOT satisfied")
+    if diff4RHSp < e and diff4LHSp < e :
+        print("Equation 4 satisfied")
+    else :
+        print("Equation 4 NOT satisfied")
      
 
 # set error tolerence in alpha
