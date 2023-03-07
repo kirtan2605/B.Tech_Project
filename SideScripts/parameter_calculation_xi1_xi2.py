@@ -14,9 +14,9 @@ def system_variables():
     Iy = mass*(width**2 + depth**2)/12
 
     ## defining the moments of inertia
-    Ix = 800
+    # Ix = 800
     # Iy = 680
-    Iz = 1000
+    # Iz = 1000
 
     moments_of_inertia = (Ix, Iy, Iz)
 
@@ -74,8 +74,8 @@ def calculate_parameters(a):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    wo = 7.236e-5
-    xi1 = 0.7               # damping coefficient of closed loop nutation frequency poles
+    #wo = 7.236e-5
+    xi1 = 0.05               # damping coefficient of closed loop nutation frequency poles
     xi2 = 0.7               # damping coefficient of closed loop orbit rate poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
@@ -134,10 +134,10 @@ def calculate_parameters(a):
 
 
 # set error tolerence in alpha
-alpha_tolerance_deg = 0.01            # tolerance in alpha in Deg
+alpha_tolerance_deg = 1e-10            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
-alpha_guess_deg = 34
+alpha_guess_deg = 5
 alpha_guess = radians(alpha_guess_deg)
 a_guess = tan(alpha_guess)
 

@@ -26,7 +26,7 @@ def calculate_parameters(a_assumed):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    wo = 7.236e-05
+    #wo = 7.236e-05
     xi = 0.7                # damping coefficient of closed loop poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
@@ -106,7 +106,7 @@ def display_parameters(parameters):
      
 
 # set error tolerence in alpha
-alpha_tolerance_deg = 0.01            # tolerance in alpha in Deg
+alpha_tolerance_deg = 1e-10            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
 alpha_guess_deg = 5
