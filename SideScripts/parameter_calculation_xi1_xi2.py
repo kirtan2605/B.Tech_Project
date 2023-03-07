@@ -23,23 +23,43 @@ def system_variables():
     return moments_of_inertia
 
 def display_parameters(parameters):
-    sys_var = system_variables()
+    Ix, Iy, Iz = system_variables()
     print("\nSystem Parameters")
-    print("Ix :", sys_var[0])
-    print("Iy :", sys_var[1])
-    print("Iz :", sys_var[2] , "\n")
+    print("Ix :", Ix)
+    print("Iy :", Iy)
+    print("Iz :", Iz , "\n")
 
+    wo, xi1, xi2, h, Kx, Kxd, a_psi, Wn1, Wn2 = parameters
     print("\nSimulation Parameters")
-    print("w0 :", parameters[0])
-    print("xi :", parameters[1])
-    print("xi :", parameters[2])
-    print("h :", parameters[3])
-    print("Kx: ", parameters[4])
-    print("Kxd: ", parameters[5])
-    print("a_psi: ", parameters[6])
-    print("alpha: ", degrees(atan(parameters[6])))
-    print("Wn1: ", parameters[7])
-    print("Wn2: ", parameters[8] , "\n")
+    print("w0 :", wo)
+    print("xi1 :", xi1)
+    print("xi2 :", xi2)
+    print("h :", h)
+    print("Kx: ", Kx)
+    print("Kxd: ", Kxd)
+    print("a_psi: ", a_psi)
+    print("alpha: ", degrees(atan(a_psi)))
+    print("Wn1: ", Wn1)
+    print("Wn2: ", Wn2, "\n")
+
+     # verify if the equations hold for epsilon e
+    e = 0.01
+    RHS1 = (Iz*Kxd)/(Ix*Iz)
+    RHS2 = (wo*h*(Ix+Iz) + Iz*Kx + h*h + a_psi*h*Kxd)/(Ix*Iz)
+    RHS3 = (a_psi*h*Kx + wo*h*Kxd)/(Ix*Iz)
+    RHS4 = (wo*wo*h*h + wo*h*Kx)/(Ix*Iz)
+    LHS1 = 2*(xi1*Wn1 + xi2*Wn2)
+    LHS2 = Wn1*Wn1 + Wn2*Wn2 + 4*xi1*xi2*Wn1*Wn2
+    LHS3 = 2*Wn1*Wn2*(xi1*Wn2 + xi2*Wn1)
+    LHS4 = Wn1*Wn1*Wn2*Wn2
+    diff1 = abs(RHS1 - LHS1)
+    diff2 = abs(RHS2 - LHS2)
+    diff3 = abs(RHS3 - LHS3)
+    diff4 = abs(RHS4 - LHS4)
+    if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
+        print("All equations satisfied")
+    else :
+        print("All equations are NOT satisfied")
 
 
 def calculate_parameters(a):
