@@ -44,18 +44,25 @@ def display_parameters(parameters):
 
      # verify if the equations hold for epsilon e
     e = 0.01
-    RHS1 = (Iz*Kxd)/(Ix*Iz)
-    RHS2 = (wo*h*(Ix+Iz) + Iz*Kx + h*h + a_psi*h*Kxd)/(Ix*Iz)
-    RHS3 = (a_psi*h*Kx + wo*h*Kxd)/(Ix*Iz)
-    RHS4 = (wo*wo*h*h + wo*h*Kx)/(Ix*Iz)
-    LHS1 = 2*(xi1*Wn1 + xi2*Wn2)
-    LHS2 = Wn1*Wn1 + Wn2*Wn2 + 4*xi1*xi2*Wn1*Wn2
-    LHS3 = 2*Wn1*Wn2*(xi1*Wn2 + xi2*Wn1)
-    LHS4 = Wn1*Wn1*Wn2*Wn2
+    RHS1 = (Iz*Kxd)
+    RHS2 = (wo*h*(Ix+Iz) + Iz*Kx + h*h + a_psi*h*Kxd)
+    RHS3 = (a_psi*h*Kx + wo*h*Kxd)
+    RHS4 = (wo*wo*h*h + wo*h*Kx)
+    LHS1 = (2*(xi1*Wn1 + xi2*Wn2))*(Ix*Iz)
+    LHS2 = (Wn1*Wn1 + Wn2*Wn2 + 4*xi1*xi2*Wn1*Wn2)*(Ix*Iz)
+    LHS3 = (2*Wn1*Wn2*(xi1*Wn2 + xi2*Wn1))*(Ix*Iz)
+    LHS4 = (Wn1*Wn1*Wn2*Wn2)*(Ix*Iz)
     diff1 = abs(RHS1 - LHS1)
     diff2 = abs(RHS2 - LHS2)
     diff3 = abs(RHS3 - LHS3)
     diff4 = abs(RHS4 - LHS4)
+
+    print("RHS1 : ", RHS1, " LHS1 : ", LHS1, " Diff1 : ", diff1)
+    print("RHS2 : ", RHS2, " LHS2 : ", LHS2, " Diff2 : ", diff2)
+    print("RHS3 : ", RHS3, " LHS3 : ", LHS3, " Diff3 : ", diff3)
+    print("RHS4 : ", RHS4, " LHS4 : ", LHS4, " Diff4 : ", diff4)
+
+
     if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
         print("All equations satisfied")
     else :
@@ -67,7 +74,7 @@ def calculate_parameters(a):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    #wo = 7.236e-5
+    wo = 7.236e-5
     xi1 = 0.7               # damping coefficient of closed loop nutation frequency poles
     xi2 = 0.7               # damping coefficient of closed loop orbit rate poles
 
@@ -127,7 +134,7 @@ def calculate_parameters(a):
 
 
 # set error tolerence in alpha
-alpha_tolerance_deg = 0.001            # tolerance in alpha in Deg
+alpha_tolerance_deg = 0.01            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
 alpha_guess_deg = 34
@@ -142,7 +149,7 @@ alpha_error = abs(alpha_calculated - alpha_guess)
 
 while alpha_error > alpha_tolerance:
 
-    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/5
+    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/2
     a_guess = tan(alpha_guess)
 
     simulation_parameters = calculate_parameters(a_guess)

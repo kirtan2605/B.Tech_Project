@@ -77,22 +77,28 @@ def display_parameters(parameters):
     print("a_psi: ", a_psi)
     print("alpha: ", degrees(atan(a_psi)))
     print("Wn1: ", Wn1)
-    print("Wn2: ", Wn2 , "\n")
+    print("Wn2: ", Wn2 , "\n")      
 
     # verify if the equations hold for epsilon e
-    e = 1e-10
-    RHS1 = (Iz*Kxd)/(Ix*Iz)
-    RHS2 = (wo*h*(Ix+Iz) + Iz*Kx + h*h + a_psi*h*Kxd)/(Ix*Iz)
-    RHS3 = (a_psi*h*Kx + wo*h*Kxd)/(Ix*Iz)
-    RHS4 = (wo*wo*h*h + wo*h*Kx)/(Ix*Iz)
-    LHS1 = 2*xi*(Wn1 + Wn2)
-    LHS2 = Wn1*Wn1 + Wn2*Wn2 + 4*xi*xi*Wn1*Wn2
-    LHS3 = 2*Wn1*Wn2*xi*(Wn1 + Wn2) 
-    LHS4 = Wn1*Wn1*Wn2*Wn2
+    
+    RHS1 = (Iz*Kxd)
+    RHS2 = (wo*h*(Ix+Iz) + Iz*Kx + h*h + a_psi*h*Kxd)
+    RHS3 = (a_psi*h*Kx + wo*h*Kxd)
+    RHS4 = (wo*wo*h*h + wo*h*Kx)
+    LHS1 = (2*(xi*Wn1 + xi*Wn2))*(Ix*Iz)
+    LHS2 = (Wn1*Wn1 + Wn2*Wn2 + 4*xi*xi*Wn1*Wn2)*((Ix*Iz))
+    LHS3 = (2*Wn1*Wn2*xi*(Wn1 + Wn2) )*(Ix*Iz)
+    LHS4 = (Wn1*Wn1*Wn2*Wn2)*(Ix*Iz)
     diff1 = abs(RHS1 - LHS1)
     diff2 = abs(RHS2 - LHS2)
     diff3 = abs(RHS3 - LHS3)
     diff4 = abs(RHS4 - LHS4)
+
+    print("RHS1 : ", RHS1, " LHS1 : ", LHS1, " Diff1 : ", diff1)
+    print("RHS2 : ", RHS2, " LHS2 : ", LHS2, " Diff2 : ", diff2)
+    print("RHS3 : ", RHS3, " LHS3 : ", LHS3, " Diff3 : ", diff3)
+    print("RHS4 : ", RHS4, " LHS4 : ", LHS4, " Diff4 : ", diff4)
+
     if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
         print("All equations satisfied")
     else :
