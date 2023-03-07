@@ -57,10 +57,19 @@ def display_parameters(parameters):
     diff3 = abs(RHS3 - LHS3)
     diff4 = abs(RHS4 - LHS4)
 
-    print("RHS1 : ", RHS1, " LHS1 : ", LHS1, " Diff1 : ", diff1)
-    print("RHS2 : ", RHS2, " LHS2 : ", LHS2, " Diff2 : ", diff2)
-    print("RHS3 : ", RHS3, " LHS3 : ", LHS3, " Diff3 : ", diff3)
-    print("RHS4 : ", RHS4, " LHS4 : ", LHS4, " Diff4 : ", diff4)
+    diff1RHSp = (diff1/RHS1)*100
+    diff1LHSp = (diff1/LHS1)*100
+    diff2RHSp = (diff2/RHS2)*100
+    diff2LHSp = (diff2/LHS2)*100
+    diff3RHSp = (diff3/RHS3)*100
+    diff3LHSp = (diff3/LHS3)*100
+    diff4RHSp = (diff4/RHS4)*100
+    diff4LHSp = (diff4/LHS4)*100
+
+    print("RHS1 percentage : ", diff1RHSp, "% LHS1 percentage : ", diff1LHSp, "%")
+    print("RHS2 percentage : ", diff2RHSp, "% LHS2 percentage : ", diff2LHSp, "%")
+    print("RHS3 percentage : ", diff3RHSp, "% LHS3 percentage : ", diff3LHSp, "%")
+    print("RHS4 percentage : ", diff4RHSp, "% LHS4 percentage : ", diff4LHSp, "%")
 
 
     if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
@@ -94,12 +103,6 @@ def calculate_parameters(a):
     h = (Tdz_max + a*Tdx_max)/wo*psi_ss
     Kx = Tdx_max/phi_ss - wo*h
 
-
-
-    print(h)
-    print(Kx)
-
-
     P = wo*h*(Ix + Iz) + Iz*Kx + h*h
     Q = sqrt((wo*wo*h*h + wo*h*Kx)/(Ix*Iz))
 
@@ -114,7 +117,7 @@ def calculate_parameters(a):
 
     quartic_roots = np.roots(p)
 
-    print(quartic_roots)
+    #print(quartic_roots)
 
     positive_roots = [x for x in quartic_roots if x > 0]
 
@@ -137,7 +140,7 @@ def calculate_parameters(a):
 alpha_tolerance_deg = 1e-10            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
-alpha_guess_deg = 5
+alpha_guess_deg = 0
 alpha_guess = radians(alpha_guess_deg)
 a_guess = tan(alpha_guess)
 
@@ -149,11 +152,11 @@ alpha_error = abs(alpha_calculated - alpha_guess)
 
 while alpha_error > alpha_tolerance:
 
-    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/2
+    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/10
     a_guess = tan(alpha_guess)
 
     simulation_parameters = calculate_parameters(a_guess)
-    print(len(simulation_parameters))
+    #print(len(simulation_parameters))
     a_calculated = simulation_parameters[6]
     alpha_calculated = atan(a_calculated)
 

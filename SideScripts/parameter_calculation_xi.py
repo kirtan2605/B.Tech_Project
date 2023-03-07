@@ -94,10 +94,19 @@ def display_parameters(parameters):
     diff3 = abs(RHS3 - LHS3)
     diff4 = abs(RHS4 - LHS4)
 
-    print("RHS1 : ", RHS1, " LHS1 : ", LHS1, " Diff1 : ", diff1)
-    print("RHS2 : ", RHS2, " LHS2 : ", LHS2, " Diff2 : ", diff2)
-    print("RHS3 : ", RHS3, " LHS3 : ", LHS3, " Diff3 : ", diff3)
-    print("RHS4 : ", RHS4, " LHS4 : ", LHS4, " Diff4 : ", diff4)
+    diff1RHSp = (diff1/RHS1)*100
+    diff1LHSp = (diff1/LHS1)*100
+    diff2RHSp = (diff2/RHS2)*100
+    diff2LHSp = (diff2/LHS2)*100
+    diff3RHSp = (diff3/RHS3)*100
+    diff3LHSp = (diff3/LHS3)*100
+    diff4RHSp = (diff4/RHS4)*100
+    diff4LHSp = (diff4/LHS4)*100
+
+    print("RHS1 percentage : ", diff1RHSp, "% LHS1 percentage : ", diff1LHSp,"%")
+    print("RHS2 percentage : ", diff2RHSp, "% LHS2 percentage : ", diff2LHSp,"%")
+    print("RHS3 percentage : ", diff3RHSp, "% LHS3 percentage : ", diff3LHSp,"%")
+    print("RHS4 percentage : ", diff4RHSp, "% LHS4 percentage : ", diff4LHSp,"%")
 
     if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
         print("All equations satisfied")
