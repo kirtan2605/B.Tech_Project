@@ -26,7 +26,7 @@ def calculate_parameters(a_assumed):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    #wo = 7.236e-05
+    wo = 7.236e-05
     xi = 0.7                # damping coefficient of closed loop poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
@@ -39,12 +39,12 @@ def calculate_parameters(a_assumed):
 
 
     # calculating h, kx without the approximation kx >> wo*h !!
-    #Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
-    #h = (Tdx_max/phi_ss - Kx)/wo
+    Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
+    h = (Tdx_max/phi_ss - Kx)/wo
 
     # calculating h, kx with the approximation kx >> wo*h
-    h = (Tdz_max + a_assumed*Tdx_max)/wo*psi_ss
-    Kx = Tdx_max/phi_ss - wo*h
+    #h = (Tdz_max + a_assumed*Tdx_max)/(wo*psi_ss)
+    #Kx = Tdx_max/phi_ss - wo*h
 
     # calculating kxd,a_calculated, wn1, wn2
     A = sqrt(((wo * wo * h * h) + (wo * h * Kx)) / (Ix * Iz))
@@ -104,28 +104,37 @@ def display_parameters(parameters):
     diff4RHSp = (diff4/RHS4)*100
     diff4LHSp = (diff4/LHS4)*100
 
-    print("RHS1 percentage : ", diff1RHSp, "% LHS1 percentage : ", diff1LHSp,"%")
-    print("RHS2 percentage : ", diff2RHSp, "% LHS2 percentage : ", diff2LHSp,"%")
-    print("RHS3 percentage : ", diff3RHSp, "% LHS3 percentage : ", diff3LHSp,"%")
-    print("RHS4 percentage : ", diff4RHSp, "% LHS4 percentage : ", diff4LHSp,"%")
-
+    print("RHS1 percentage : ", diff1RHSp,"%")
+    print("LHS1 percentage : ", diff1LHSp,"%")
     if diff1RHSp < e and diff1LHSp < e :
         print("Equation 1 satisfied")
     else :
         print("Equation 1 NOTe satisfied")
+    print()
+    
+    print("RHS2 percentage : ", diff2RHSp,"%")
+    print("LHS2 percentage : ", diff2LHSp,"%")
     if diff2RHSp < e and diff2LHSp < e :
         print("Equation 2 satisfied")
     else :
         print("Equation 2 NOT satisfied")
+    print()
+
+    print("RHS3 percentage : ", diff3RHSp,"%")
+    print("LHS3 percentage : ", diff3LHSp,"%")
     if diff3RHSp < e and diff3LHSp < e :
         print("Equation 3 satisfied")
     else :
         print("Equation 3 NOT satisfied")
+    print()
+
+    print("RHS4 percentage : ", diff4RHSp,"%")
+    print("LHS4 percentage : ", diff4LHSp,"%")
     if diff4RHSp < e and diff4LHSp < e :
         print("Equation 4 satisfied")
     else :
         print("Equation 4 NOT satisfied")
-     
+    print()
 
 # set error tolerence in alpha
 alpha_tolerance_deg = 1e-10            # tolerance in alpha in Deg

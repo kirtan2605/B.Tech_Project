@@ -14,9 +14,9 @@ def system_variables():
     Iy = mass*(width**2 + depth**2)/12
 
     ## defining the moments of inertia
-    # Ix = 800
+    Ix = 800
     # Iy = 680
-    # Iz = 1000
+    Iz = 1000
 
     moments_of_inertia = (Ix, Iy, Iz)
 
@@ -66,33 +66,37 @@ def display_parameters(parameters):
     diff4RHSp = (diff4/RHS4)*100
     diff4LHSp = (diff4/LHS4)*100
 
-    print("RHS1 percentage : ", diff1RHSp, "% LHS1 percentage : ", diff1LHSp, "%")
-    print("RHS2 percentage : ", diff2RHSp, "% LHS2 percentage : ", diff2LHSp, "%")
-    print("RHS3 percentage : ", diff3RHSp, "% LHS3 percentage : ", diff3LHSp, "%")
-    print("RHS4 percentage : ", diff4RHSp, "% LHS4 percentage : ", diff4LHSp, "%")
-
+    print("RHS1 percentage : ", diff1RHSp,"%")
+    print("LHS1 percentage : ", diff1LHSp,"%")
     if diff1RHSp < e and diff1LHSp < e :
         print("Equation 1 satisfied")
     else :
         print("Equation 1 NOTe satisfied")
+    print()
+    
+    print("RHS2 percentage : ", diff2RHSp,"%")
+    print("LHS2 percentage : ", diff2LHSp,"%")
     if diff2RHSp < e and diff2LHSp < e :
         print("Equation 2 satisfied")
     else :
         print("Equation 2 NOT satisfied")
+    print()
+
+    print("RHS3 percentage : ", diff3RHSp,"%")
+    print("LHS3 percentage : ", diff3LHSp,"%")
     if diff3RHSp < e and diff3LHSp < e :
         print("Equation 3 satisfied")
     else :
         print("Equation 3 NOT satisfied")
+    print()
+
+    print("RHS4 percentage : ", diff4RHSp,"%")
+    print("LHS4 percentage : ", diff4LHSp,"%")
     if diff4RHSp < e and diff4LHSp < e :
         print("Equation 4 satisfied")
     else :
         print("Equation 4 NOT satisfied")
-
-
-    if diff1 < e and diff2 < e and diff3 < e and diff4 < e :
-        print("All equations satisfied")
-    else :
-        print("All equations are NOT satisfied")
+    print()
 
 
 def calculate_parameters(a):
@@ -100,7 +104,7 @@ def calculate_parameters(a):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    #wo = 7.236e-5
+    wo = 7.236e-5
     xi1 = 0.05               # damping coefficient of closed loop nutation frequency poles
     xi2 = 0.7               # damping coefficient of closed loop orbit rate poles
 
@@ -117,7 +121,7 @@ def calculate_parameters(a):
     #h = (Tdx_max/phi_ss - Kx)/wo
 
     # calculating h, kx with approximation kx >> wo*h
-    h = (Tdz_max + a*Tdx_max)/wo*psi_ss
+    h = (Tdz_max + a*Tdx_max)/(wo*psi_ss)
     Kx = Tdx_max/phi_ss - wo*h
 
     P = wo*h*(Ix + Iz) + Iz*Kx + h*h
@@ -154,7 +158,7 @@ def calculate_parameters(a):
 
 
 # set error tolerence in alpha
-alpha_tolerance_deg = 1e-10            # tolerance in alpha in Deg
+alpha_tolerance_deg = 1e-15            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
 
 alpha_guess_deg = 0
