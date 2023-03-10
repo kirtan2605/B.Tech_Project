@@ -39,12 +39,12 @@ def calculate_parameters(a_assumed):
 
 
     # calculating h, kx without the approximation kx >> wo*h !!
-    Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
-    h = (Tdx_max/phi_ss - Kx)/wo
+    #Kx = (Tdx_max*(psi_ss/phi_ss) - Tdz_max)/(psi_ss - a_assumed*phi_ss)
+    #h = (Tdx_max/phi_ss - Kx)/wo
 
     # calculating h, kx with the approximation kx >> wo*h
-    #h = (Tdz_max + a_assumed*Tdx_max)/(wo*psi_ss)
-    #Kx = Tdx_max/phi_ss - wo*h
+    h = (Tdz_max - a_assumed*Tdx_max)/(wo*psi_ss)
+    Kx = Tdx_max/phi_ss - wo*h
 
     # calculating kxd,a_calculated, wn1, wn2
     A = sqrt(((wo * wo * h * h) + (wo * h * Kx)) / (Ix * Iz))

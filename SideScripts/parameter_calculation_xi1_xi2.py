@@ -121,7 +121,7 @@ def calculate_parameters(a):
     #h = (Tdx_max/phi_ss - Kx)/wo
 
     # calculating h, kx with approximation kx >> wo*h
-    h = (Tdz_max + a*Tdx_max)/(wo*psi_ss)
+    h = (Tdz_max - a*Tdx_max)/(wo*psi_ss)
     Kx = Tdx_max/phi_ss - wo*h
 
     P = wo*h*(Ix + Iz) + Iz*Kx + h*h
