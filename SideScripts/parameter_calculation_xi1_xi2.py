@@ -71,7 +71,7 @@ def display_parameters(parameters):
     if diff1RHSp < e and diff1LHSp < e :
         print("Equation 1 satisfied")
     else :
-        print("Equation 1 NOTe satisfied")
+        print("Equation 1 NOT satisfied")
     print()
     
     print("RHS2 percentage : ", diff2RHSp,"%")
@@ -105,7 +105,7 @@ def calculate_parameters(a):
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
     wo = 7.236e-5
-    xi1 = 0.05               # damping coefficient of closed loop nutation frequency poles
+    xi1 = 0.52               # damping coefficient of closed loop nutation frequency poles
     xi2 = 0.7               # damping coefficient of closed loop orbit rate poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
@@ -123,6 +123,7 @@ def calculate_parameters(a):
     # calculating h, kx with approximation kx >> wo*h
     h = (Tdz_max - a*Tdx_max)/(wo*psi_ss)
     Kx = Tdx_max/phi_ss - wo*h
+    
 
     P = wo*h*(Ix + Iz) + Iz*Kx + h*h
     Q = sqrt((wo*wo*h*h + wo*h*Kx)/(Ix*Iz))
@@ -137,6 +138,7 @@ def calculate_parameters(a):
     p[4] = 4*Ix*Ix*xi1*xi2*Iz*Q*Q*Q - 4*Ix*Ix*xi2*xi2*Q*Q*wo*h - Ix*Iz*Q*Q
 
     quartic_roots = np.roots(p)
+    print(quartic_roots)
 
     #print(quartic_roots)
 
@@ -146,10 +148,13 @@ def calculate_parameters(a):
         print("Error in closed loop frequency calculation")
         exit
     else : 
-        Wn1 = max(positive_roots)
-        Wn2 = min(positive_roots)
+        Wn1 = min(positive_roots)
+        print(Q)
+        Wn2 = Q/Wn1
+        #print(" roots check ", Wn1*Wn2, " Q check", Q)
         Kxd = 2*Ix*(xi1*Wn1 + xi2*Wn2)
-        a_psi = 2*Wn1*Wn2*(xi1*Wn2 + xi2*Wn1)*Ix*Iz - wo*h*Kxd
+        a_psi = (2*Wn1*Wn2*(xi1*Wn2 + xi2*Wn1)*Ix*Iz - wo*h*Kxd)/(h*Kx)
+        print(Wn1, Wn2, Kxd, a_psi)
 
 
     calculated_parameters = (wo, xi1, xi2, h, Kx, Kxd, a_psi, Wn1, Wn2)
@@ -158,8 +163,9 @@ def calculate_parameters(a):
 
 
 # set error tolerence in alpha
-alpha_tolerance_deg = 1e-15            # tolerance in alpha in Deg
+alpha_tolerance_deg = 1e-1            # tolerance in alpha in Deg
 alpha_tolerance = radians(alpha_tolerance_deg)
+a_tolerance = tan(alpha_tolerance)
 
 alpha_guess_deg = 0
 alpha_guess = radians(alpha_guess_deg)
@@ -169,18 +175,18 @@ simulation_parameters = calculate_parameters(a_guess)
 a_calculated = simulation_parameters[6]
 alpha_calculated = atan(a_calculated)
 
-alpha_error = abs(alpha_calculated - alpha_guess)
+# alpha_error = abs(alpha_calculated - alpha_guess)
+a_error = abs(a_guess - a_calculated)
+it = 0
+while a_error > a_tolerance:
+    it= it+1
 
-while alpha_error > alpha_tolerance:
-
-    alpha_guess = alpha_guess - (alpha_guess - alpha_calculated)/10
-    a_guess = tan(alpha_guess)
+    print("a error : ", (a_calculated - a_guess))
+    a_guess = a_guess + (a_guess - a_calculated)/2
 
     simulation_parameters = calculate_parameters(a_guess)
     #print(len(simulation_parameters))
     a_calculated = simulation_parameters[6]
-    alpha_calculated = atan(a_calculated)
 
-    alpha_error = abs(alpha_calculated - alpha_guess)
 
 display_parameters(simulation_parameters)

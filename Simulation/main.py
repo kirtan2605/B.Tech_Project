@@ -3,7 +3,7 @@ import math
 
 # initializing simulation runtime parameters
 start_time = 0                      # simulation start time in sec
-end_time = 10000                    # simulation end time in sec
+end_time = 1000                    # simulation end time in sec
 time_step = 1                     # timestep Delta t
 runtime_parameters = [start_time, end_time, time_step]
 
@@ -15,7 +15,8 @@ MOI_z = 1532.96                     # moment of inertia about x-axis in kg.m^2
 wheel_momentum = 10                 # angular momentum of momentum wheel in N.m.sec
 orbit_rate = 2*math.pi/86400        # orbit rate in rad/sec
 
-nutation_frequency = wheel_momentum/((MOI_x*MOI_z)**0.5)
+
+nutation_frequency = wheel_momentum/sqrt(MOI_x*MOI_z)
 system_variables = [MOI_x, MOI_y, MOI_z, orbit_rate, nutation_frequency, wheel_momentum]
 
 # initializing initial value of state variables
@@ -27,7 +28,7 @@ initial_conditions = [initial_roll, initial_roll_rate, initial_yaw, initial_yaw_
 
 # initializing System Control variables
 roll_desired = radians(0)       # desired roll angle in radians (5 deg = 0.0872665)
-offset_angle = 0.0033614714328              # offset angle of thruster in degree
+offset_angle = 1.56              # offset angle of thruster in degree
 
 # time between each measurement of earth sensor
 output_time = 1

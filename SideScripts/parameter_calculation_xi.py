@@ -13,9 +13,9 @@ def system_variables():
     Iy = mass*(width**2 + depth**2)/12
 
     ## defining the moments of inertia
-    Ix = 800
+    # Ix = 800
     # Iy = 680
-    Iz = 1000
+    # Iz = 1000
 
     moments_of_inertia = (Ix, Iy, Iz)
 
@@ -26,7 +26,6 @@ def calculate_parameters(a_assumed):
     (Ix, Iy, Iz) = system_variables()
 
     wo = 2*pi/86400         # orbit frequency in rad/sec
-    wo = 7.236e-05
     xi = 0.7                # damping coefficient of closed loop poles
 
     Tdx_max = 5e-6          # maximum magnitude of disturbance torque
