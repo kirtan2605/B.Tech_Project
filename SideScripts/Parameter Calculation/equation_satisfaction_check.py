@@ -12,17 +12,17 @@ def check_equation_satisfaction(a_psi, h, Kx, Kxd, Wn1, Wn2, xi1, xi2):
     phi_ss = radians(0.05)
     psi_ss = radians(0.4)
 
-    # verify if the equations hold for epsilon e
-    e = 5
+    # verify if the equations hold for epsilon e% error
+    e = 10
     
     RHS1 = phi_ss
     LHS1 = Tdx/(wo*h + Kx)
 
     RHS2 = psi_ss
     # No approximation LHS
-    LHS2 = (Tdz/(wo*h)) - (a_psi*Tdx*Kx)/(wo*h*(Kx + wo*h))
+    #LHS2 = (Tdz/(wo*h)) + (a_psi*Tdx*Kx)/(wo*h*(Kx + wo*h))
     # Approximation LHS
-    #LHS2 = ((Tdz - a_psi*Tdx)/(wo*h))
+    LHS2 = ((Tdz + a_psi*Tdx)/(wo*h))
 
     RHS3 = (Iz*Kxd)
     LHS3 = (2*(xi1*Wn1 + xi2*Wn2))*(Ix*Iz)
@@ -56,21 +56,33 @@ def check_equation_satisfaction(a_psi, h, Kx, Kxd, Wn1, Wn2, xi1, xi2):
     diff6RHSp = (diff4/RHS6)*100
     diff6LHSp = (diff4/LHS6)*100
 
+    print("RHS1 : ", RHS1)
+    print("LHS1 : ", LHS1)
     print("RHS1 percentage : ", diff1RHSp,"%")
     print("LHS1 percentage : ", diff1LHSp,"%")
 
+    print("RHS2 : ", RHS2)
+    print("LHS2 : ", LHS2)
     print("RHS2 percentage : ", diff2RHSp,"%")
     print("LHS2 percentage : ", diff2LHSp,"%")
 
+    print("RHS3 : ", RHS3)
+    print("LHS3 : ", LHS3)
     print("RHS3 percentage : ", diff3RHSp,"%")
     print("LHS3 percentage : ", diff3LHSp,"%")
 
+    print("RHS4 : ", RHS4)
+    print("LHS4 : ", LHS4)
     print("RHS4 percentage : ", diff4RHSp,"%")
     print("LHS4 percentage : ", diff4LHSp,"%")
 
+    print("RHS5 : ", RHS5)
+    print("LHS5 : ", LHS5)
     print("RHS5 percentage : ", diff5RHSp,"%")
     print("LHS5 percentage : ", diff5LHSp,"%")
 
+    print("RHS6 : ", RHS6)
+    print("LHS6 : ", LHS6)
     print("RHS6 percentage : ", diff6RHSp,"%")
     print("LHS6 percentage : ", diff6LHSp,"%")
 
