@@ -4,7 +4,7 @@ def check_equation_satisfaction(a_psi, h, Kx, Kxd, Wn1, Wn2, xi1, xi2):
     Ix = 800
     Iz = 1000
 
-    wo = 7.236e-5
+    wo = 2*pi/86400
 
     Tdx = 5e-6
     Tdz = 5e-6
