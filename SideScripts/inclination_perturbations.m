@@ -1,3 +1,5 @@
+clear all;
+clc;
 % Earth parameters
 Req  = 6378.137;		% km, equatorial radius of the earth
 muE  = 398600.4415;		% mu_E = GM : gravitational parameter of the earth km^3/s^2, 
@@ -17,11 +19,13 @@ e = 0.000316;			% GOES 6
 
 %i = 0.1 * pi/180;  	    % Vinod
 %i = 2 * pi/180;		% inclination, rad
-%i = 0;                 % ideal
-i = 1.97310 * pi/180;	% GOES 6
+i = 0;                 % ideal
+%i = 1.97310 * pi/180;	% GOES 6
 
 Omega = (235.28-360) * pi/180;	% rad, ascending node angle [-pi,pi]
 AoP   = 23.05 * pi/180;		    % rad, argument of perigee
+disp(Omega)
+disp(AoP)
 
 omega0  = sqrt(muE/sma^3);      % rad/s; 
 n_synch = sqrt(muE/sma_c^3);
@@ -34,38 +38,26 @@ OP_sec  = orbit_period - OP_hrs * 3600 - OP_mins * 60;
 
 % step size, seconds, traversing the orbit
 
-dT = 1;                
+dT = 6;                
 K  = 24 * 3600 / dT;
 
 % Memory for saving the results
 % Nadir angle from a deviated lat-lon caused by i (Brij Agrawal, p. 69) to
 % the target P -- the ideal longitude of the geostationary satellite with latitude = 0
 
-Time        = NaN(K+1,1);
-Nadir_angle = NaN(K+1,1);
-Lamda       = NaN(K+1,1);    % Target - SSP distance in angle
+Time    = NaN(K+1,1);
+Del_lat = NaN(K+1,1);
+Del_lon = NaN(K+1,1);
 
-PhiEp        = NaN(K+1,1);   % azimuth of the target, 
-PhiEn        = NaN(K+1,1);
-PhiE         = NaN(K+1,1);
-PhiE_polar   = NaN(K+1,1);
-
-Del_lat      = NaN(K+1,1);
-Del_lon      = NaN(K+1,1);
-
-Roll  = NaN(K+1,1);
-Pitch = NaN(K+1,1);
-Yaw   = NaN(K+1,1);
-
-RollH  = NaN(K+1,1);
-PitchH = NaN(K+1,1);
+Time(1,1) = 0;
+Del_lat(1,1) = 0;
+Del_lon(1,1) = 0;
 
 for k = 1:K
-
     Time(k+1,1) = k * dT / 3600;      % hours
     nu          = omega0 * k * dT;    % orbit angle, rad, circular orbit
 
-   % SSP of the geosynchronous satellite: Brij Agrawal, p. 69
+    % SSP of the geosynchronous satellite: Brij Agrawal, p. 69
     del_lat =              i * sin(nu);
     del_lon = - 0.25 * i * i * sin(2*nu) + del_n * k * dT + 2*e*sin(nu);  % negligible due to i compared to del_lat
 
@@ -73,30 +65,48 @@ for k = 1:K
     Del_lon(k+1,1) = del_lon * 180/pi;
 end
 
+disp('Start points')
+disp(Time(1,1))
+disp(Del_lat(1,1))
+disp(Del_lon(1,1))
+
+disp('End points')
+disp(Time(end,1))
+disp(Del_lat(end,1))
+disp(Del_lon(end,1))
+
+
 figure(1)
-subplot (2,2,1)
-plot (Del_lon, Del_lat)
+hold on
+plot (Del_lon, Del_lat,'Color','b')
+plot(Del_lon(1,1), Del_lat(1,1),'Color',[0.9290, 0.6940, 0.1250],'marker','o','markersize',10,'LineWidth',2)
+plot(Del_lon(end,1), Del_lat(end,1),'Color','r','marker','x','markersize',10,'LineWidth',2)
 xlabel ('\Delta longitude (deg)')
 ylabel ('\Delta latitude (deg)')
-axis equal
+legend('Variation','Initial Coordinate','Final Coordinate')
 grid on
+hold off
 
-subplot (2,2,2)
-plot (Del_lon, Del_lat)
-xlabel ('\Delta longitude (deg)')
-ylabel ('\Delta latitude (deg)')
-grid on
-
-subplot (2,2,3)
-plot (Time, Del_lon)
+figure(2)
+hold on
+plot (Time, Del_lon,'Color','b'),
+plot(Time(1,1), Del_lon(1,1),'Color',[0.9290, 0.6940, 0.1250],'marker','o','markersize',10,'LineWidth',2)
+plot(Time(end,1), Del_lon(end,1),'Color','r','marker','x','markersize',10,'LineWidth',2)
 xlabel ('Time (hours)')
-ylabel ('\Delta lon (deg)')
+ylabel ('\Delta longitude (deg)')
 set (gca,'XTick',0:3:24)
+legend('Variation','Initial Coordinate','Final Coordinate')
 grid on
+hold off
 
-subplot (2,2,4)
-plot (Time, Del_lat)
+figure(3)
+hold on
+plot(Time, Del_lat, 'Color','b')
+plot(Time(1,1), Del_lat(1,1),'Color',[0.9290, 0.6940, 0.1250],'marker','o','markersize',10,'LineWidth',2)
+plot(Time(end,1), Del_lat(end,1),'Color','r','marker','x','markersize',10,'LineWidth',2)
 xlabel ('Time (hours)')
 ylabel ('\Delta latitude (deg)')
 set (gca,'XTick',0:3:24)
+legend('Variation','Initial Coordinate','Final Coordinate')
 grid on
+hold off
