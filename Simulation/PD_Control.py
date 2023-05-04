@@ -8,7 +8,7 @@ def PD_Control(ip, op_prev, Dt):
 
     # PD Control parameters
     kp = 0.004275
-    kd = 0.673
+    kd = 2.3472
 
 
     a = ((kd*2/Dt) + kp)

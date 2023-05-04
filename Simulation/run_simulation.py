@@ -76,7 +76,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     controller_step = int(controller_time / Dt)
 
 
-    T_c = 10  # Torque Magnitude Multiplier
+    T_c = 50  # Torque Magnitude Multiplier
     print(omega_nutation)
 
 
@@ -111,7 +111,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         else:
             phi_measured_arr[i] = phi_measured_arr[i - 1]
 
-        phi_measured_arr[i] = earth_sensor(x_arr[0, i])
+        #phi_measured_arr[i] = earth_sensor(x_arr[0, i])
 
         # applying low pass filter to filter out noise
         if i - filter_order < 0:
@@ -121,9 +121,8 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
             phi_measured_lpf_arr[i] = low_pass_filter(phi_measured_lpf_arr[i - filter_order:i + 1],
                                                       phi_measured_arr[i - filter_order:i + 1], b, a, filter_order)
 
-        phi_measured_lpf_arr[i] = phi_measured_arr[i]
+        #phi_measured_lpf_arr[i] = phi_measured_arr[i]
 
-        
         roll_error_measured_arr[i] = roll_desired - phi_measured_lpf_arr[i]
 
         # calculating rate of change of state variables?
@@ -133,6 +132,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         x_arr[:, i + 1] = x + np.dot(x_dot, Dt)
         x_arr[0, i + 1] = transform_to_minus_pi_to_pi(x_arr[0, i + 1])
         x_arr[2, i + 1] = transform_to_minus_pi_to_pi(x_arr[2, i + 1])
+
 
         '''
         if i % controller_step == 0:
@@ -149,9 +149,8 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, sampling_time)
         control_torque_arr[i+1] = T_c*Tc_controller_output
         
-        '''
-        control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], sampling_time)
         
+        control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], sampling_time)
         
         # removing sudden sign change of control torque
         if (np.sign(control_torque_arr[i+1])*np.sign(control_torque_arr[i]) < 0) :
@@ -183,7 +182,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
                 control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
                 thruster_off_counter = thruster_off_counter + 1
                 inhibition = False
-        '''
+        
         
         
         # effects of actuation set-up i.e. offset nature of thrusters
@@ -195,7 +194,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     # plotting the result
     plt.plot(t_arr/60, np.rad2deg(x_arr[0, :]), linewidth=1, label='Roll Angle (degrees)')
     #plt.plot(t_arr/60, np.rad2deg(phi_measured_arr), linewidth=0.5, label='Measured Roll')
-    plt.plot(t_arr/60, np.rad2deg(phi_measured_lpf_arr), linewidth=1, label='Measured Roll LPF')
+    #plt.plot(t_arr/60, np.rad2deg(phi_measured_lpf_arr), linewidth=1, label='Measured Roll LPF')
     plt.axhline(y=degrees(roll_desired), color='r', linestyle='-')
     plt.axhline(y=degrees(roll_desired) + 0.05, color='r', linestyle=':')
     plt.axhline(y=degrees(roll_desired) - 0.05, color='r', linestyle=':')
