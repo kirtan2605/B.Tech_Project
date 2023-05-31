@@ -27,23 +27,10 @@ def plot_yaw_vs_roll(x_arr):
 
 
 
-def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, sampling_parameters, initial_conditions):
+def run_simulation(roll_desired, alpha_d, runtime_parameters, sampling_parameters, initial_conditions):
     t_start, t_end, Dt = runtime_parameters
-    Ix, Iy, Iz, omega0, omega_nutation, h = system_variables
     sampling_time, controller_time = sampling_parameters
-
-    a = 4 * (omega0 ** 2) * (Iy - Iz)
-    b = -1 * omega0 * (Ix - Iy + Iz)
-    c = (omega0 ** 2) * (Iy - Ix)
-
-    # x_dot = A.x + B.Md + B.Mc
-    B = [[0, 0], [1/Ix, 0], [0, 0], [0, 1/Iz]]
-    A1 = (-1 * (a + omega0 * h)) / Ix
-    A2 = (-(b + h)) / Ix
-    A3 = (b + h) / Iz
-    A4 = (-1 * (c + omega0 * h)) / Iz
-    A = [[0, 1, 0, 0], [A1, 0, 0, A2], [0, 0, 0, 1], [0, A3, A4, 0]]
-
+    
     # calculating number of timestamps in simulation
     n_steps = int(round(t_end - t_start) / Dt)
     t_arr = np.append((np.arange(t_start, t_end, Dt)), t_end)
@@ -77,19 +64,25 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     controller_step = int(controller_time / Dt)
 
 
-    T_c = 50  # Torque Magnitude Multiplier
+    T_c = 100  # Torque Magnitude Multiplier
+
+    omega_nutation = 0.0133
+    
+    #### add closed loop nutation frequency instead!!!!
     print(omega_nutation)
 
 
     f_nut = omega_nutation/(2*pi)
     t_nut = 1/f_nut
-    inhibition_time = t_nut*0.625           # from Iwens
+    inhibition_time = t_nut*0.5           # from Iwens
     inhibition_step = int(round(inhibition_time / Dt))
+    
 
+    # calculated omega_nutation = 0.133
     # using a Butterworth Filter of order 1 to filter out the sensor noise
     filter_order = 1  # Order of the butterworth filter
     f_sample = 1 / sampling_time  # Sample frequency in Hz
-    f_cutoff_rps = omega_nutation * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
+    f_cutoff_rps = 0.0133 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
     #f_cutoff_rps = 0.02 * 5
     b, a = butterworth_lpf(f_sample, f_cutoff_rps, filter_order)
 
@@ -125,27 +118,11 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
 
         roll_error_measured_arr[i] = roll_desired - phi_measured_lpf_arr[i]
 
-        ########    THIS PART NEEDS TO BE CHANGED   ##########
-        #x_dot = np.matmul(A, x) + np.matmul(B, Mc_arr[:, i]) + np.matmul(B, Md_arr[:, i])
-        #x_arr[:, i + 1] = x + np.dot(x_dot, Dt)
         x_arr[:,i+1] = rk4(ode_system, i, x, Mc_arr[:, i], Md_arr[:, i], Dt)
-        ########    THIS PART NEEDS TO BE CHANGED   ##########
 
         x_arr[0, i + 1] = transform_to_minus_pi_to_pi(x_arr[0, i + 1])
         x_arr[2, i + 1] = transform_to_minus_pi_to_pi(x_arr[2, i + 1])
 
-
-        '''
-        if i % controller_step == 0:
-            if i < 2:
-                Tc_controller_output = PD_Control(roll_error_measured_arr[0:i], Tc_controller_output, sampling_time)
-            else:
-                Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, sampling_time)
-            control_torque_arr[i+1] = T_c*Tc_controller_output
-
-        if i % controller_step != 0:
-            control_torque_arr[i+1] = control_torque_arr[i] 
-        '''
 
         Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i+1], Tc_controller_output, sampling_time)
         control_torque_arr[i+1] = T_c*Tc_controller_output
@@ -154,6 +131,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], sampling_time)
         
         '''
+        ####    Nutation Attentuation   ###
         # removing sudden sign change of control torque
         if (np.sign(control_torque_arr[i+1])*np.sign(control_torque_arr[i]) < 0) :
             control_torque_arr[i+1] = 0
@@ -184,7 +162,6 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
                 control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
                 thruster_off_counter = thruster_off_counter + 1
                 inhibition = False
-        
         '''
         
         # effects of actuation set-up i.e. offset nature of thrusters

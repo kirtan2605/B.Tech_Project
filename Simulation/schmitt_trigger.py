@@ -3,7 +3,7 @@ def dual_schmitt_trigger(ip, op_prev):
 
     # Dual Schmitt Trigger Parameters calculation!!
     
-    Um = 0.0075
+    Um = 0.01
     OFF = 0
 
     h = 0.03
