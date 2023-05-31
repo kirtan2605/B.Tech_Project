@@ -9,6 +9,7 @@ from butterworth_lpf import *
 from low_pass_filter import *
 from schmitt_trigger import *
 from pwpfm import *
+from solver import *
 
 def plot_yaw_vs_roll(x_arr):
     # plotting the result
@@ -76,7 +77,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     controller_step = int(controller_time / Dt)
 
 
-    T_c = 1  # Torque Magnitude Multiplier
+    T_c = 50  # Torque Magnitude Multiplier
     print(omega_nutation)
 
 
@@ -104,7 +105,6 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         x = x_arr[:, i]
         roll_error_arr[i] = roll_desired - x_arr[0, i]
 
-        
         # modelling of sample-and-hold earth sensor
         if i % sampling_step == 0:
             phi_measured_arr[i] = earth_sensor(x_arr[0, i])
@@ -126,11 +126,9 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         roll_error_measured_arr[i] = roll_desired - phi_measured_lpf_arr[i]
 
         ########    THIS PART NEEDS TO BE CHANGED   ##########
-        # calculating rate of change of state variables?
-        x_dot = np.matmul(A, x) + np.matmul(B, Mc_arr[:, i]) + np.matmul(B, Md_arr[:, i])
-
-        # updating state variables
-        x_arr[:, i + 1] = x + np.dot(x_dot, Dt)
+        #x_dot = np.matmul(A, x) + np.matmul(B, Mc_arr[:, i]) + np.matmul(B, Md_arr[:, i])
+        #x_arr[:, i + 1] = x + np.dot(x_dot, Dt)
+        x_arr[:,i+1] = rk4(ode_system, i, x, Mc_arr[:, i], Md_arr[:, i], Dt)
         ########    THIS PART NEEDS TO BE CHANGED   ##########
 
         x_arr[0, i + 1] = transform_to_minus_pi_to_pi(x_arr[0, i + 1])
@@ -152,9 +150,10 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
         Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i+1], Tc_controller_output, sampling_time)
         control_torque_arr[i+1] = T_c*Tc_controller_output
         
-        '''
+        
         control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], sampling_time)
         
+        '''
         # removing sudden sign change of control torque
         if (np.sign(control_torque_arr[i+1])*np.sign(control_torque_arr[i]) < 0) :
             control_torque_arr[i+1] = 0

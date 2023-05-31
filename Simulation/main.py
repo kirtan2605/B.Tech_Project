@@ -3,8 +3,8 @@ import math
 
 # initializing simulation runtime parameters
 start_time = 0                      # simulation start time in sec
-end_time = 1000                     # simulation end time in sec
-time_step = 0.1                       # timestep Delta t
+end_time = 600                     # simulation end time in sec
+time_step = 0.05                       # timestep Delta t
 runtime_parameters = [start_time, end_time, time_step]
 
 # initializing system variables

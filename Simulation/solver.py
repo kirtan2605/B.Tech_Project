@@ -6,7 +6,7 @@ import math
     https://medium.com/geekculture/runge-kutta-numerical-integration-of-ordinary-differential-equations-in-python-9c8ab7fb279c
 """
 
-def ode_system(_t, _x):
+def ode_system(_t, _x, Tc, Td, **kwargs):
     """
     system of first order differential equations
     _t: discrete time step value
@@ -24,29 +24,31 @@ def ode_system(_t, _x):
     b = -1 * omega0 * (Ix - Iy + Iz)
     c = (omega0 ** 2) * (Iy - Ix)
 
-    Tx = 0
-    Tz = 0
+    Tx = Tc[0] + Td[0]
+    Tz = Tc[1] + Td[1]
 
     return np.array([_x[1], (Tx - (a + omega0*h)*_x[0] - (b + h)*_x[3])/Ix, _x[3], (Tz - (c + omega0*h)*_x[2] + (b + h)*_x[1])/Ix ])
 
 
 # runge-kutta fourth-order numerical integration
-def rk4(func, tk, _yk, _dt=0.01, **kwargs):
+def rk4(func, tk, _yk, Tc, Td, _dt=0.01, **kwargs):
     """
     single-step fourth-order numerical integration (RK4) method
     func: system of first order ODEs
     tk: current time step
     _yk: current state vector [y1, y2, y3, ...]
+    Tc : control torque
+    Td : disturbance torque
     _dt: discrete time step size
     **kwargs: additional parameters for ODE system
     returns: y evaluated at time k+1
     """
 
     # evaluate derivative at several stages within time interval
-    f1 = func(tk, _yk, **kwargs)
-    f2 = func(tk + _dt / 2, _yk + (f1 * (_dt / 2)), **kwargs)
-    f3 = func(tk + _dt / 2, _yk + (f2 * (_dt / 2)), **kwargs)
-    f4 = func(tk + _dt, _yk + (f3 * _dt), **kwargs)
+    f1 = func(tk, _yk, Tc, Td, **kwargs)
+    f2 = func(tk + _dt / 2, _yk + (f1 * (_dt / 2)), Tc, Td, **kwargs)
+    f3 = func(tk + _dt / 2, _yk + (f2 * (_dt / 2)), Tc, Td, **kwargs)
+    f4 = func(tk + _dt, _yk + (f3 * _dt), Tc, Td, **kwargs)
 
     # return an average of the derivative over tk, tk + dt
     return _yk + (_dt / 6) * (f1 + (2 * f2) + (2 * f3) + f4)
