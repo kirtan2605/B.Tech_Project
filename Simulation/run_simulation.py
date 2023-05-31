@@ -76,13 +76,13 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     controller_step = int(controller_time / Dt)
 
 
-    T_c = 50  # Torque Magnitude Multiplier
+    T_c = 1  # Torque Magnitude Multiplier
     print(omega_nutation)
 
 
     f_nut = omega_nutation/(2*pi)
     t_nut = 1/f_nut
-    inhibition_time = t_nut*0.5           # from Iwens
+    inhibition_time = t_nut*0.625           # from Iwens
     inhibition_step = int(round(inhibition_time / Dt))
 
     # using a Butterworth Filter of order 1 to filter out the sensor noise
@@ -125,11 +125,14 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
 
         roll_error_measured_arr[i] = roll_desired - phi_measured_lpf_arr[i]
 
+        ########    THIS PART NEEDS TO BE CHANGED   ##########
         # calculating rate of change of state variables?
         x_dot = np.matmul(A, x) + np.matmul(B, Mc_arr[:, i]) + np.matmul(B, Md_arr[:, i])
 
         # updating state variables
         x_arr[:, i + 1] = x + np.dot(x_dot, Dt)
+        ########    THIS PART NEEDS TO BE CHANGED   ##########
+
         x_arr[0, i + 1] = transform_to_minus_pi_to_pi(x_arr[0, i + 1])
         x_arr[2, i + 1] = transform_to_minus_pi_to_pi(x_arr[2, i + 1])
 
@@ -146,10 +149,10 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
             control_torque_arr[i+1] = control_torque_arr[i] 
         '''
 
-        Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i + 1], Tc_controller_output, sampling_time)
+        Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i+1], Tc_controller_output, sampling_time)
         control_torque_arr[i+1] = T_c*Tc_controller_output
         
-        
+        '''
         control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], sampling_time)
         
         # removing sudden sign change of control torque
@@ -183,7 +186,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
                 thruster_off_counter = thruster_off_counter + 1
                 inhibition = False
         
-        
+        '''
         
         # effects of actuation set-up i.e. offset nature of thrusters
         offset_actuation = [cos(radians(alpha_d)), -1 * sin(radians(alpha_d))]
@@ -202,6 +205,24 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, system_variables, 
     plt.title('Roll Angle vs time', fontsize=12)
     plt.xlabel('t (minutes)', fontsize=12)
     plt.ylabel('Angle (degrees)', fontsize=12)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.grid(True)
+    # plt.axis
+    plt.legend()
+    plt.show()
+
+
+    # plotting the result
+    plt.plot(np.rad2deg(x_arr[0, :]),np.rad2deg(x_arr[1, :]), linewidth=1, label='Roll')
+    plt.plot(np.rad2deg(x_arr[2, :]),np.rad2deg(x_arr[3, :]), linewidth=1, label='Yaw')
+    #plt.axhline(y=degrees(roll_desired), color='r', linestyle='-')
+    #plt.axhline(y=degrees(roll_desired) + 0.05, color='r', linestyle=':')
+    #plt.axhline(y=degrees(roll_desired) - 0.05, color='r', linestyle=':')
+    # plt.plot..... plot another data in same plot if needed
+    plt.title('Rate vs Angle', fontsize=12)
+    plt.xlabel('Angle (deg)', fontsize=12)
+    plt.ylabel('Rate (deg/s)', fontsize=12)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.grid(True)

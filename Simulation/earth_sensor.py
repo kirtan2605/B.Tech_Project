@@ -10,8 +10,9 @@ def earth_sensor(true_value):
 
     """
 
-    stat_noise_RMS_deg = 0.01
-    quantization_deg = 0.02
+    #stat_noise_RMS_deg = 0.01
+    stat_noise_RMS_deg = 0.00
+    quantization_deg = 0.001
 
     if true_value < 0:
         true_value_sign = -1
