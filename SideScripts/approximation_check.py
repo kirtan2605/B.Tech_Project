@@ -8,12 +8,21 @@ Iz = 1532.96                     # moment of inertia about x-axis in kg.m^2
 h = 20                 # angular momentum of momentum wheel in N.m.sec
 omega0 = 2*math.pi/86164        # orbit rate in rad/sec
 
+## Approximations during the Pole Calculation
+
 a = 4 * (omega0 ** 2) * (Iy - Iz)
 b = -1 * omega0 * (Ix - Iy + Iz)
 c = (omega0 ** 2) * (Iy - Ix)
 
-print('h : ', h)
+print('\nh : ', h)
 print('a/wo : ', math.fabs(a/omega0))
 print('b : ', math.fabs(b))
 print('c/wo : ', math.fabs(c/omega0))
-print('wo*(Ix + Iz) : ', math.fabs(omega0*(Ix+Iz)))
+print('wo*(Ix + Iz) : ', math.fabs(omega0*(Ix+Iz)), '\n')
+
+## Approximations in the Binomial Expansion in the Pole Calculation
+
+first_term = (4*omega0*omega0*Ix*Iz)/(h*h)
+print('first binomial term : ', first_term)
+second_term = ((4*omega0*omega0*Ix*Iz)**2)/(8*h*h)
+print('second binomial term : ', second_term, '\n')

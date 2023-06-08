@@ -61,37 +61,21 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, sampling_parameter
 
     # Earth Sensor and Controller Delay Implementation
     sampling_step = int(sampling_time / Dt)
-    controller_step = int(controller_time / Dt)
+    #controller_step = int(controller_time / Dt)
 
 
     T_c = 100  # Torque Magnitude Multiplier
 
-    omega_nutation = 0.0133
-    
-    #### add closed loop nutation frequency instead!!!!
-    print(omega_nutation)
+    omega_nutation = 0.01414        # closed loop nutation frequency
 
-
-    f_nut = omega_nutation/(2*pi)
-    t_nut = 1/f_nut
-    inhibition_time = t_nut*0.5           # from Iwens
-    inhibition_step = int(round(inhibition_time / Dt))
-    
-
-    # calculated omega_nutation = 0.133
     # using a Butterworth Filter of order 1 to filter out the sensor noise
     filter_order = 1  # Order of the butterworth filter
     f_sample = 1 / sampling_time  # Sample frequency in Hz
-    f_cutoff_rps = 0.0133 * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
-    #f_cutoff_rps = 0.02 * 5
+    f_cutoff_rps = omega_nutation * 10  # Cut-off frequency in rad/sec (closed loop wn*7.5)
     b, a = butterworth_lpf(f_sample, f_cutoff_rps, filter_order)
 
     Tc_controller_output = 0
 
-    thruster_on_counter = 0
-    thruster_off_counter = 0
-
-    inhibition = False
 
     for i in range(0, n_steps):
 
@@ -102,17 +86,15 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, sampling_parameter
         if i % sampling_step == 0:
             phi_measured_arr[i] = earth_sensor(x_arr[0, i])
         else:
-            phi_measured_arr[i] = phi_measured_arr[i - 1]
-
-        #phi_measured_arr[i] = earth_sensor(x_arr[0, i])
+            phi_measured_arr[i] = phi_measured_arr[i-1]
 
         # applying low pass filter to filter out noise
         if i - filter_order < 0:
-            phi_measured_lpf_arr[i] = low_pass_filter(phi_measured_lpf_arr[0:i + 1], phi_measured_arr[0:i + 1], b, a,
+            phi_measured_lpf_arr[i] = low_pass_filter(phi_measured_lpf_arr[0:i+1], phi_measured_arr[0:i+1], b, a,
                                                       filter_order)
         else:
-            phi_measured_lpf_arr[i] = low_pass_filter(phi_measured_lpf_arr[i - filter_order:i + 1],
-                                                      phi_measured_arr[i - filter_order:i + 1], b, a, filter_order)
+            phi_measured_lpf_arr[i] = low_pass_filter(phi_measured_lpf_arr[i-filter_order:i+1],
+                                                      phi_measured_arr[i-filter_order:i+1], b, a, filter_order)
 
         #phi_measured_lpf_arr[i] = phi_measured_arr[i]
 
@@ -120,8 +102,8 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, sampling_parameter
 
         x_arr[:,i+1] = rk4(ode_system, i, x, Mc_arr[:, i], Md_arr[:, i], Dt)
 
-        x_arr[0, i + 1] = transform_to_minus_pi_to_pi(x_arr[0, i + 1])
-        x_arr[2, i + 1] = transform_to_minus_pi_to_pi(x_arr[2, i + 1])
+        x_arr[0, i+1] = transform_to_minus_pi_to_pi(x_arr[0, i+1])
+        x_arr[2, i+1] = transform_to_minus_pi_to_pi(x_arr[2, i+1])
 
 
         Tc_controller_output = PD_Control(roll_error_measured_arr[i-2:i+1], Tc_controller_output, sampling_time)
@@ -129,40 +111,7 @@ def run_simulation(roll_desired, alpha_d, runtime_parameters, sampling_parameter
         
         
         control_torque_arr[i+1], pwpfm_error_arr[i+1], pwpfm_error_lpf_arr[i+1] =  pwpfm(T_c*Tc_controller_output, pwpfm_error_arr[i], pwpfm_error_lpf_arr[i], control_torque_arr[i], sampling_time)
-        
-        '''
-        ####    Nutation Attentuation   ###
-        # removing sudden sign change of control torque
-        if (np.sign(control_torque_arr[i+1])*np.sign(control_torque_arr[i]) < 0) :
-            control_torque_arr[i+1] = 0
-
-
-        # nutation attenuation by seperating pules with half the nutation period.
-        if not inhibition :
-            if (control_torque_arr[i+1] != 0 and control_torque_arr[i] == 0) :
-                thruster_on_step = i+1
-                thruster_on_counter = thruster_on_counter + 1
-                print("thruster on")
-            if (control_torque_arr[i+1] == 0 and control_torque_arr[i] != 0) :
-                thruster_off_step = i+1
-                thruster_off_counter = thruster_off_counter + 1
-                print("thruster off")
-
-        if thruster_off_counter%2 != 0 :
-            if i+1 < thruster_on_step + inhibition_step :
-                inhibition = True
-                control_torque_arr[i+1] = 0
-            if i+1 == thruster_on_step + inhibition_step :
-                print("inhibition ends")
-                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
-                thruster_on_counter = thruster_on_counter + 1
-            if i+1 > thruster_on_step + inhibition_step and i+1 < thruster_off_step + inhibition_step :
-                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
-            if i+1 == thruster_off_step + inhibition_step :
-                control_torque_arr[i+1] = control_torque_arr[i+1-inhibition_step]
-                thruster_off_counter = thruster_off_counter + 1
-                inhibition = False
-        '''
+    
         
         # effects of actuation set-up i.e. offset nature of thrusters
         offset_actuation = [cos(radians(alpha_d)), -1 * sin(radians(alpha_d))]

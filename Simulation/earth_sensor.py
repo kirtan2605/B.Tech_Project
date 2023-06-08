@@ -1,5 +1,6 @@
 from sensor_noise import *
 import numpy as np
+from math import *
 
 
 def earth_sensor(true_value):
@@ -10,9 +11,9 @@ def earth_sensor(true_value):
 
     """
 
-    # stat_noise_RMS_deg = 0.01
-    stat_noise_RMS_deg = 0
-    quantization_deg = 0.001
+    # values of Earth Sensor Characteristics taken from Sidi
+    stat_noise_RMS_deg = radians(0.012)
+    quantization_deg = radians(0.02)
 
     if true_value < 0:
         true_value_sign = -1
